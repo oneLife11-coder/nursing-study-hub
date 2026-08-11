@@ -1,12 +1,12 @@
 // ============================================================================
-// NURSING PREP LAB
-// UX FIXES
+// NURSING PREP LAB - UX FIXES
 //
-// 1. Study Command Center appears only on the dashboard
-// 2. Weak Areas opens focused topic-by-topic review
-// 3. Back works one step at a time
-// 4. iPhone/Safari swipe-back and browser Back work inside the app
-// 5. Daily Study Plan remembers the selected study time
+// 1. Study Command Center only appears on the dashboard
+// 2. Weak Areas shows focused missed-topic review
+// 3. Back works one step at a time, including browser/iPhone swipe-back
+// 4. Daily Study Plan remembers the selected study time
+// 5. Mobile form fields stay visible above the on-screen keyboard
+// 6. Popups do NOT close when the user taps/clicks outside them
 //
 // No MutationObserver. No repeating timer.
 // ============================================================================
@@ -15,7 +15,6 @@
     "use strict";
 
     document.addEventListener("DOMContentLoaded", function () {
-
         const PLAN_KEY = "nshTOOLS_daily_plan";
         const PLAN_CHOICE_KEY = "nshUX_planner_minutes";
 
@@ -32,105 +31,169 @@
             anatomy1: {
                 name: "Anatomy & Physiology I",
                 icon: "🫀",
-                card: "anatomy1",
                 pageId: "anatomy1-page",
-                prefixes: ["nshAP1_"]
+                prefixes: ["nshAP1_"],
+                weakButtons: [
+                    "#anatomy1-weak-button",
+                    "#ap1-weak-button"
+                ]
             },
 
             anatomy2: {
                 name: "Anatomy & Physiology II",
                 icon: "❤️",
-                card: "anatomy2",
                 pageId: "anatomy2-page",
-                prefixes: ["nshAP2_"]
+                prefixes: ["nshAP2_"],
+                weakButtons: [
+                    "#ap2-weak-button",
+                    "#anatomy2-weak-button"
+                ]
             },
 
             chemistry: {
                 name: "Chemistry",
                 icon: "🧪",
-                card: "chemistry",
                 pageId: "chemistry-page",
                 prefixes: [
                     "nshCHEM_FINAL_",
                     "nshCHEM_"
+                ],
+                weakButtons: [
+                    "#chem-weak-button"
                 ]
             },
 
             microbiology: {
                 name: "Microbiology",
                 icon: "🦠",
-                card: "microbiology",
                 pageId: "microbiology-page",
                 prefixes: [
                     "nshMICRO_FINAL_",
                     "nshMICRO_"
+                ],
+                weakButtons: [
+                    "#micro-weak-button",
+                    "#microbiology-weak-button"
                 ]
             },
 
             statistics: {
                 name: "Statistics",
                 icon: "📊",
-                card: "statistics",
                 pageId: "statistics-page",
-                prefixes: ["nshSTAT_"]
+                prefixes: [
+                    "nshSTAT_"
+                ],
+                weakButtons: [
+                    "#stat-weak-button",
+                    "#statistics-weak-button"
+                ]
             },
 
             nutrition: {
                 name: "Nutrition & Diet",
                 icon: "🍎",
-                card: "nutrition",
                 pageId: "nutrition-page",
                 prefixes: [
                     "nshNUT_FINAL_",
                     "nshNUT_"
+                ],
+                weakButtons: [
+                    "#nut-weak-button",
+                    "#nutrition-weak-button"
                 ]
             },
 
             labs: {
                 name: "Anatomy & Science Labs",
                 icon: "🔬",
-                card: "labs",
                 pageId: "lab-center-page",
                 prefixes: [
                     "nshLABS_",
                     "nshLAB_",
                     "nshSCIENCELAB_"
+                ],
+                weakButtons: [
+                    "#lab-weak-button",
+                    "#labs-weak-button"
                 ]
             },
 
             teas: {
                 name: "TEAS Practice Center",
                 icon: "🎓",
-                card: "teas",
                 pageId: "teas-center-page",
-                prefixes: ["nshTEAS_"]
+                prefixes: [
+                    "nshTEAS_"
+                ],
+                weakButtons: [
+                    "#teas-weak",
+                    "#teas-weak-button",
+                    "#teas-weakness-button"
+                ]
             }
         };
 
+
         let rememberedCourseId = null;
-        let activeWeakFilter = "all";
 
-        let historyReady = false;
-        let historyApplying = false;
-        let historySuppressed = false;
-        let historyCaptureTimer = null;
+        let activeWeakFilter =
+            "all";
 
-        let lastHistorySignature = "";
-        let lastHistorySnapshot = null;
+        let historyReady =
+            false;
+
+        let historyApplying =
+            false;
+
+        let historySuppressed =
+            false;
+
+        let historyCaptureTimer =
+            null;
+
+        let lastHistorySignature =
+            "";
+
+        let lastHistorySnapshot =
+            null;
+
+        let focusScrollTimer =
+            null;
 
 
         // ====================================================================
         // BASIC HELPERS
         // ====================================================================
 
-        function escapeHTML(value) {
+        function escapeHTML(
+            value
+        ) {
 
-            return String(value ?? "")
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
+            return String(
+                value ??
+                ""
+            )
+                .replaceAll(
+                    "&",
+                    "&amp;"
+                )
+                .replaceAll(
+                    "<",
+                    "&lt;"
+                )
+                .replaceAll(
+                    ">",
+                    "&gt;"
+                )
+                .replaceAll(
+                    '"',
+                    "&quot;"
+                )
+                .replaceAll(
+                    "'",
+                    "&#039;"
+                );
 
         }
 
@@ -149,9 +212,12 @@
                         )
                     );
 
+
                 return (
-                    value === null ||
-                    value === undefined
+                    value ===
+                    null ||
+                    value ===
+                    undefined
                 )
                     ? fallback
                     : value;
@@ -170,25 +236,31 @@
             const date =
                 new Date();
 
+
             return [
 
                 date.getFullYear(),
 
                 String(
-                    date.getMonth() + 1
-                ).padStart(
-                    2,
-                    "0"
-                ),
+                    date.getMonth() +
+                    1
+                )
+                    .padStart(
+                        2,
+                        "0"
+                    ),
 
                 String(
                     date.getDate()
-                ).padStart(
-                    2,
-                    "0"
                 )
+                    .padStart(
+                        2,
+                        "0"
+                    )
 
-            ].join("-");
+            ].join(
+                "-"
+            );
 
         }
 
@@ -198,27 +270,25 @@
         ) {
 
             if (
-                !element
+                !element ||
+                element
+                    .classList
+                    .contains(
+                        "hidden"
+                    )
             ) {
 
                 return false;
 
             }
 
-            if (
-                element.classList.contains(
-                    "hidden"
-                )
-            ) {
-
-                return false;
-
-            }
 
             const style =
-                window.getComputedStyle(
-                    element
-                );
+                window
+                    .getComputedStyle(
+                        element
+                    );
+
 
             return (
                 style.display !==
@@ -238,9 +308,11 @@
                     0,
 
                 behavior:
-                    window.matchMedia(
-                        "(prefers-reduced-motion: reduce)"
-                    ).matches
+                    window
+                        .matchMedia(
+                            "(prefers-reduced-motion: reduce)"
+                        )
+                        .matches
                         ? "auto"
                         : "smooth"
 
@@ -254,51 +326,64 @@
         ) {
 
             let container =
-                document.getElementById(
-                    "nsh-ux-toast-container"
-                );
+                document
+                    .getElementById(
+                        "nsh-ux-toast-container"
+                    );
+
 
             if (
                 !container
             ) {
 
                 container =
-                    document.createElement(
-                        "div"
-                    );
+                    document
+                        .createElement(
+                            "div"
+                        );
+
 
                 container.id =
                     "nsh-ux-toast-container";
 
-                document.body.appendChild(
-                    container
-                );
+
+                document.body
+                    .appendChild(
+                        container
+                    );
 
             }
 
 
             const toast =
-                document.createElement(
-                    "div"
-                );
+                document
+                    .createElement(
+                        "div"
+                    );
+
 
             toast.className =
                 "nsh-ux-toast";
 
+
             toast.textContent =
                 message;
 
-            container.appendChild(
-                toast
-            );
+
+            container
+                .appendChild(
+                    toast
+                );
 
 
             requestAnimationFrame(
                 function () {
 
-                    toast.classList.add(
-                        "show"
-                    );
+                    toast
+                        .classList
+                        .add(
+                            "show"
+                        );
 
                 }
             );
@@ -307,14 +392,18 @@
             setTimeout(
                 function () {
 
-                    toast.classList.remove(
-                        "show"
-                    );
+                    toast
+                        .classList
+                        .remove(
+                            "show"
+                        );
+
 
                     setTimeout(
                         function () {
 
-                            toast.remove();
+                            toast
+                                .remove();
 
                         },
                         200
@@ -334,9 +423,10 @@
         function injectStyles() {
 
             if (
-                document.getElementById(
-                    "nsh-ux-fixes-styles"
-                )
+                document
+                    .getElementById(
+                        "nsh-ux-fixes-styles"
+                    )
             ) {
 
                 return;
@@ -345,9 +435,11 @@
 
 
             const style =
-                document.createElement(
-                    "style"
-                );
+                document
+                    .createElement(
+                        "style"
+                    );
+
 
             style.id =
                 "nsh-ux-fixes-styles";
@@ -355,73 +447,175 @@
 
             style.textContent = `
 
-                #study-command-center.nsh-ux-dashboard-hidden {
-                    display: none !important;
+                /* ============================================================
+                   DASHBOARD-ONLY STUDY COMMAND CENTER
+                ============================================================ */
+
+                #app:has(
+                    .course-page:not(.hidden),
+                    .lesson-page:not(.hidden)
+                )
+                #study-command-center {
+                    display:
+                        none !important;
                 }
 
 
+                #study-command-center.nsh-ux-dashboard-hidden {
+                    display:
+                        none !important;
+                }
+
+
+                /* ============================================================
+                   MODAL BACK BUTTON
+                ============================================================ */
+
                 .nsh-ux-modal-back {
-                    min-height: 40px;
-                    padding: 8px 12px;
-                    margin-right: 10px;
-                    border: 1px solid #d0d5dd;
-                    border-radius: 11px;
-                    background: #fff;
-                    color: #344054;
-                    font-weight: 800;
-                    cursor: pointer;
-                    white-space: nowrap;
+                    min-height:
+                        40px;
+
+                    padding:
+                        8px
+                        12px;
+
+                    margin-right:
+                        10px;
+
+                    border:
+                        1px
+                        solid
+                        #d0d5dd;
+
+                    border-radius:
+                        11px;
+
+                    background:
+                        #fff;
+
+                    color:
+                        #344054;
+
+                    font-weight:
+                        800;
+
+                    cursor:
+                        pointer;
+
+                    white-space:
+                        nowrap;
                 }
 
 
                 .nsh-ux-modal-back:hover {
-                    border-color: #6366f1;
-                    color: #4338ca;
+                    border-color:
+                        #6366f1;
+
+                    color:
+                        #4338ca;
                 }
 
 
                 .study-modal-header.nsh-ux-header-with-back,
                 .study-tools-modal-header.nsh-ux-header-with-back {
-                    align-items: center;
+                    align-items:
+                        center;
                 }
 
 
                 .nsh-ux-modal-header-left {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    min-width: 0;
+                    display:
+                        flex;
+
+                    align-items:
+                        center;
+
+                    gap:
+                        10px;
+
+                    min-width:
+                        0;
                 }
 
 
+                /* ============================================================
+                   FOCUSED WEAK AREAS
+                ============================================================ */
+
                 #nsh-ux-weak-overlay.hidden {
-                    display: none !important;
+                    display:
+                        none !important;
                 }
 
 
                 #nsh-ux-weak-overlay {
-                    position: fixed;
-                    inset: 0;
-                    z-index: 2147482000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 24px;
-                    background: rgba(15, 23, 42, .66);
-                    backdrop-filter: blur(7px);
-                    -webkit-backdrop-filter: blur(7px);
+                    position:
+                        fixed;
+
+                    inset:
+                        0;
+
+                    z-index:
+                        2147482000;
+
+                    display:
+                        flex;
+
+                    align-items:
+                        center;
+
+                    justify-content:
+                        center;
+
+                    padding:
+                        24px;
+
+                    background:
+                        rgba(
+                            15,
+                            23,
+                            42,
+                            .66
+                        );
+
+                    backdrop-filter:
+                        blur(
+                            7px
+                        );
+
+                    -webkit-backdrop-filter:
+                        blur(
+                            7px
+                        );
                 }
 
 
                 .nsh-ux-weak-modal {
-                    width: min(1080px, 96vw);
-                    max-height: 92vh;
-                    overflow: auto;
-                    background: #fff;
-                    color: #172033;
-                    border-radius: 24px;
+                    width:
+                        min(
+                            1080px,
+                            96vw
+                        );
+
+                    max-height:
+                        92vh;
+
+                    overflow:
+                        auto;
+
+                    background:
+                        #fff;
+
+                    color:
+                        #172033;
+
+                    border-radius:
+                        24px;
+
                     box-shadow:
-                        0 30px 90px
+                        0
+                        30px
+                        90px
                         rgba(
                             0,
                             0,
@@ -432,14 +626,31 @@
 
 
                 .nsh-ux-weak-header {
-                    position: sticky;
-                    top: 0;
-                    z-index: 10;
-                    display: flex;
-                    align-items: flex-start;
-                    justify-content: space-between;
-                    gap: 18px;
-                    padding: 22px 24px;
+                    position:
+                        sticky;
+
+                    top:
+                        0;
+
+                    z-index:
+                        10;
+
+                    display:
+                        flex;
+
+                    align-items:
+                        flex-start;
+
+                    justify-content:
+                        space-between;
+
+                    gap:
+                        18px;
+
+                    padding:
+                        22px
+                        24px;
+
                     background:
                         rgba(
                             255,
@@ -447,9 +658,12 @@
                             255,
                             .97
                         );
+
                     border-bottom:
-                        1px solid
+                        1px
+                        solid
                         #e5e7eb;
+
                     backdrop-filter:
                         blur(
                             8px
@@ -458,22 +672,38 @@
 
 
                 .nsh-ux-weak-header-main {
-                    display: flex;
-                    align-items: flex-start;
-                    gap: 12px;
-                    min-width: 0;
+                    display:
+                        flex;
+
+                    align-items:
+                        flex-start;
+
+                    gap:
+                        12px;
+
+                    min-width:
+                        0;
                 }
 
 
                 .nsh-ux-weak-header h2 {
-                    margin: 3px 0 5px;
+                    margin:
+                        3px
+                        0
+                        5px;
                 }
 
 
-                .nsh-ux-weak-header p {
-                    margin: 0;
-                    color: #667085;
-                    line-height: 1.55;
+                .nsh-ux-weak-header p,
+                .nsh-ux-weak-card p {
+                    margin:
+                        0;
+
+                    color:
+                        #667085;
+
+                    line-height:
+                        1.55;
                 }
 
 
@@ -482,40 +712,69 @@
                 .nsh-ux-filter,
                 .nsh-ux-action {
                     border:
-                        1px solid
+                        1px
+                        solid
                         #d0d5dd;
-                    background: #fff;
-                    color: #344054;
-                    border-radius: 11px;
-                    min-height: 42px;
-                    padding: 9px 13px;
-                    font-weight: 800;
-                    cursor: pointer;
+
+                    background:
+                        #fff;
+
+                    color:
+                        #344054;
+
+                    border-radius:
+                        11px;
+
+                    min-height:
+                        42px;
+
+                    padding:
+                        9px
+                        13px;
+
+                    font-weight:
+                        800;
+
+                    cursor:
+                        pointer;
                 }
 
 
                 .nsh-ux-close {
-                    width: 42px;
-                    padding: 0;
-                    font-size: 22px;
-                    flex: 0 0 auto;
+                    width:
+                        42px;
+
+                    padding:
+                        0;
+
+                    font-size:
+                        22px;
+
+                    flex:
+                        0
+                        0
+                        auto;
                 }
 
 
                 .nsh-ux-back:hover,
                 .nsh-ux-filter:hover,
                 .nsh-ux-action:hover {
-                    border-color: #6366f1;
+                    border-color:
+                        #6366f1;
                 }
 
 
                 .nsh-ux-weak-body {
-                    padding: 24px;
+                    padding:
+                        24px;
                 }
 
 
                 .nsh-ux-weak-summary {
-                    display: grid;
+                    display:
+                        grid;
+
                     grid-template-columns:
                         repeat(
                             auto-fit,
@@ -524,210 +783,353 @@
                                 1fr
                             )
                         );
-                    gap: 12px;
-                    margin-bottom: 20px;
+
+                    gap:
+                        12px;
+
+                    margin-bottom:
+                        20px;
                 }
 
 
                 .nsh-ux-summary-card {
-                    padding: 17px;
+                    padding:
+                        17px;
+
                     border:
-                        1px solid
+                        1px
+                        solid
                         #e5e7eb;
-                    border-radius: 16px;
-                    background: #f8fafc;
+
+                    border-radius:
+                        16px;
+
+                    background:
+                        #f8fafc;
                 }
 
 
                 .nsh-ux-summary-card strong {
-                    display: block;
-                    margin-bottom: 4px;
-                    font-size: 26px;
+                    display:
+                        block;
+
+                    margin-bottom:
+                        4px;
+
+                    font-size:
+                        26px;
                 }
 
 
                 .nsh-ux-summary-card span {
-                    color: #667085;
-                    font-size: 11px;
-                    font-weight: 900;
+                    color:
+                        #667085;
+
+                    font-size:
+                        11px;
+
+                    font-weight:
+                        900;
+                }
+
+
+                .nsh-ux-filter-row,
+                .nsh-ux-weak-actions {
+                    display:
+                        flex;
+
+                    flex-wrap:
+                        wrap;
+
+                    gap:
+                        9px;
                 }
 
 
                 .nsh-ux-filter-row {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 8px;
-                    margin-bottom: 20px;
+                    margin-bottom:
+                        20px;
+                }
+
+
+                .nsh-ux-weak-actions {
+                    margin-top:
+                        15px;
                 }
 
 
                 .nsh-ux-filter.active {
-                    background: #4f46e5;
-                    border-color: #4f46e5;
-                    color: #fff;
+                    background:
+                        #4f46e5;
+
+                    border-color:
+                        #4f46e5;
+
+                    color:
+                        #fff;
                 }
 
 
                 .nsh-ux-weak-list {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 14px;
+                    display:
+                        flex;
+
+                    flex-direction:
+                        column;
+
+                    gap:
+                        14px;
                 }
 
 
                 .nsh-ux-weak-card {
-                    padding: 18px;
+                    padding:
+                        18px;
+
                     border:
-                        1px solid
+                        1px
+                        solid
                         #e5e7eb;
-                    border-radius: 18px;
-                    background: #fff;
+
+                    border-radius:
+                        18px;
+
+                    background:
+                        #fff;
                 }
 
 
                 .nsh-ux-weak-card-top {
-                    display: flex;
-                    align-items: flex-start;
-                    justify-content: space-between;
-                    gap: 16px;
+                    display:
+                        flex;
+
+                    align-items:
+                        flex-start;
+
+                    justify-content:
+                        space-between;
+
+                    gap:
+                        16px;
                 }
 
 
                 .nsh-ux-course-pill,
                 .nsh-ux-count-pill {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 5px;
-                    padding: 5px 9px;
-                    border-radius: 999px;
-                    font-size: 10px;
-                    font-weight: 900;
+                    display:
+                        inline-flex;
+
+                    align-items:
+                        center;
+
+                    gap:
+                        5px;
+
+                    padding:
+                        5px
+                        9px;
+
+                    border-radius:
+                        999px;
+
+                    font-size:
+                        10px;
+
+                    font-weight:
+                        900;
                 }
 
 
                 .nsh-ux-course-pill {
-                    background: #eef2ff;
-                    color: #4338ca;
+                    background:
+                        #eef2ff;
+
+                    color:
+                        #4338ca;
                 }
 
 
                 .nsh-ux-count-pill {
-                    background: #fff1f2;
-                    color: #be123c;
-                    flex: 0 0 auto;
+                    background:
+                        #fff1f2;
+
+                    color:
+                        #be123c;
+
+                    flex:
+                        0
+                        0
+                        auto;
                 }
 
 
                 .nsh-ux-weak-card h3 {
-                    margin: 8px 0 5px;
-                }
-
-
-                .nsh-ux-weak-card p {
-                    margin: 0;
-                    color: #667085;
-                    line-height: 1.55;
-                }
-
-
-                .nsh-ux-weak-actions {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 9px;
-                    margin-top: 15px;
+                    margin:
+                        8px
+                        0
+                        5px;
                 }
 
 
                 .nsh-ux-action.primary {
-                    background: #4f46e5;
-                    border-color: #4f46e5;
-                    color: #fff;
+                    background:
+                        #4f46e5;
+
+                    border-color:
+                        #4f46e5;
+
+                    color:
+                        #fff;
                 }
 
 
                 .nsh-ux-action.focus {
-                    background: #fff7ed;
-                    border-color: #fdba74;
-                    color: #9a3412;
+                    background:
+                        #fff7ed;
+
+                    border-color:
+                        #fdba74;
+
+                    color:
+                        #9a3412;
                 }
 
 
                 .nsh-ux-empty {
-                    padding: 42px 20px;
-                    text-align: center;
+                    padding:
+                        42px
+                        20px;
+
+                    text-align:
+                        center;
+
                     border:
-                        1px dashed
+                        1px
+                        dashed
                         #cbd5e1;
-                    border-radius: 18px;
-                    color: #667085;
+
+                    border-radius:
+                        18px;
+
+                    color:
+                        #667085;
                 }
 
 
                 .nsh-ux-empty-icon {
-                    margin-bottom: 10px;
-                    font-size: 44px;
+                    margin-bottom:
+                        10px;
+
+                    font-size:
+                        44px;
                 }
 
 
+                /* ============================================================
+                   TOAST
+                ============================================================ */
+
                 #nsh-ux-toast-container {
-                    position: fixed;
-                    z-index: 2147483600;
+                    position:
+                        fixed;
+
+                    z-index:
+                        2147483600;
+
                     top:
                         calc(
                             var(
                                 --nsh-header-height,
                                 78px
-                            ) +
+                            )
+                            +
                             14px
                         );
-                    right: 18px;
+
+                    right:
+                        18px;
+
                     width:
                         min(
                             380px,
                             calc(
-                                100vw -
+                                100vw
+                                -
                                 36px
                             )
                         );
-                    pointer-events: none;
+
+                    pointer-events:
+                        none;
                 }
 
 
                 .nsh-ux-toast {
-                    margin-bottom: 8px;
-                    padding: 13px 15px;
-                    border-radius: 13px;
-                    background: #111827;
-                    color: #fff;
+                    margin-bottom:
+                        8px;
+
+                    padding:
+                        13px
+                        15px;
+
+                    border-radius:
+                        13px;
+
+                    background:
+                        #111827;
+
+                    color:
+                        #fff;
+
                     box-shadow:
-                        0 12px 35px
+                        0
+                        12px
+                        35px
                         rgba(
                             0,
                             0,
                             0,
                             .22
                         );
-                    font-size: 12px;
-                    line-height: 1.5;
-                    opacity: 0;
+
+                    font-size:
+                        12px;
+
+                    line-height:
+                        1.5;
+
+                    opacity:
+                        0;
+
                     transform:
                         translateY(
                             -8px
                         );
+
                     transition:
-                        opacity .2s ease,
-                        transform .2s ease;
+                        opacity
+                        .2s
+                        ease,
+                        transform
+                        .2s
+                        ease;
                 }
 
 
                 .nsh-ux-toast.show {
-                    opacity: 1;
+                    opacity:
+                        1;
+
                     transform:
                         translateY(
                             0
                         );
                 }
 
+
+                /* ============================================================
+                   DARK MODE
+                ============================================================ */
 
                 body.dark-mode
                 .nsh-ux-weak-modal,
@@ -749,9 +1151,14 @@
 
                 body.dark-mode
                 .nsh-ux-modal-back {
-                    background: #111827;
-                    border-color: #334155;
-                    color: #e2e8f0;
+                    background:
+                        #111827;
+
+                    border-color:
+                        #334155;
+
+                    color:
+                        #e2e8f0;
                 }
 
 
@@ -764,7 +1171,9 @@
                             39,
                             .97
                         );
-                    border-color: #334155;
+
+                    border-color:
+                        #334155;
                 }
 
 
@@ -772,84 +1181,189 @@
                 .nsh-ux-weak-header p,
 
                 body.dark-mode
-                .nsh-ux-weak-card p {
-                    color: #cbd5e1;
+                .nsh-ux-weak-card p,
+
+                body.dark-mode
+                .nsh-ux-summary-card span {
+                    color:
+                        #cbd5e1;
                 }
 
 
                 body.dark-mode
                 .nsh-ux-summary-card {
-                    background: #172033;
-                    border-color: #334155;
-                    color: #f8fafc;
+                    background:
+                        #172033;
+
+                    border-color:
+                        #334155;
+
+                    color:
+                        #f8fafc;
                 }
 
 
-                body.dark-mode
-                .nsh-ux-summary-card span {
-                    color: #cbd5e1;
-                }
+                /* ============================================================
+                   MOBILE KEYBOARD + POPUP IMPROVEMENTS
+                ============================================================ */
 
+                @media (
+                    max-width:
+                    700px
+                ) {
 
-                @media (max-width: 700px) {
-
+                    .study-tools-modal-overlay,
+                    .study-overlay,
                     #nsh-ux-weak-overlay {
-                        padding: 0;
-                        align-items: flex-end;
+                        align-items:
+                            flex-start !important;
+
+                        justify-content:
+                            center !important;
+
+                        padding-top:
+                            max(
+                                8px,
+                                env(
+                                    safe-area-inset-top
+                                )
+                            ) !important;
+
+                        padding-right:
+                            0 !important;
+
+                        padding-bottom:
+                            max(
+                                8px,
+                                env(
+                                    safe-area-inset-bottom
+                                )
+                            ) !important;
+
+                        padding-left:
+                            0 !important;
                     }
 
 
+                    .study-tools-modal,
+                    .study-modal,
                     .nsh-ux-weak-modal {
-                        width: 100%;
-                        max-height: 94vh;
+                        width:
+                            100% !important;
+
+                        max-width:
+                            100% !important;
+
+                        max-height:
+                            calc(
+                                var(
+                                    --nsh-visual-height,
+                                    100dvh
+                                )
+                                -
+                                16px
+                            ) !important;
+
+                        overflow-y:
+                            auto !important;
+
+                        overscroll-behavior:
+                            contain;
+
+                        -webkit-overflow-scrolling:
+                            touch;
+
+                        scroll-padding-top:
+                            100px;
+
+                        scroll-padding-bottom:
+                            45vh;
+
                         border-radius:
-                            22px
-                            22px
+                            20px
+                            20px
                             0
                             0;
                     }
 
 
+                    .study-tools-modal-body,
+                    .study-modal-content,
+                    #nsh-ux-weak-body,
+                    .nsh-ux-weak-body {
+                        padding-bottom:
+                            max(
+                                42px,
+                                env(
+                                    safe-area-inset-bottom
+                                )
+                            ) !important;
+                    }
+
+
+                    .study-tools-modal input,
+                    .study-tools-modal textarea,
+                    .study-tools-modal select,
+
+                    .study-modal input,
+                    .study-modal textarea,
+                    .study-modal select,
+
+                    .nsh-ux-weak-modal input,
+                    .nsh-ux-weak-modal textarea,
+                    .nsh-ux-weak-modal select {
+                        scroll-margin-top:
+                            105px;
+
+                        scroll-margin-bottom:
+                            45vh;
+                    }
+
+
                     .nsh-ux-weak-header,
                     .nsh-ux-weak-body {
-                        padding: 18px;
+                        padding:
+                            18px;
                     }
 
 
-                    .nsh-ux-weak-header-main {
-                        display: block;
-                    }
-
-
-                    .nsh-ux-back {
-                        margin-bottom: 10px;
-                    }
-
-
+                    .nsh-ux-weak-header-main,
                     .nsh-ux-weak-card-top {
-                        display: block;
+                        display:
+                            block;
                     }
 
 
+                    .nsh-ux-back,
                     .nsh-ux-count-pill {
-                        margin-top: 10px;
+                        margin-bottom:
+                            10px;
                     }
 
 
                     .nsh-ux-weak-actions {
-                        display: grid;
-                        grid-template-columns: 1fr;
+                        display:
+                            grid;
+
+                        grid-template-columns:
+                            1fr;
                     }
 
 
-                    .nsh-ux-weak-actions button {
-                        width: 100%;
+                    .nsh-ux-weak-actions
+                    button {
+                        width:
+                            100%;
                     }
 
 
                     .nsh-ux-modal-back {
-                        padding: 7px 9px;
-                        font-size: 12px;
+                        padding:
+                            7px
+                            9px;
+
+                        font-size:
+                            12px;
                     }
 
                 }
@@ -857,9 +1371,10 @@
             `;
 
 
-            document.head.appendChild(
-                style
-            );
+            document.head
+                .appendChild(
+                    style
+                );
 
         }
 
@@ -872,9 +1387,10 @@
 
             return (
                 Array.from(
-                    document.querySelectorAll(
-                        ".course-page"
-                    )
+                    document
+                        .querySelectorAll(
+                            ".course-page"
+                        )
                 )
                     .find(
                         isVisible
@@ -889,9 +1405,10 @@
 
             return (
                 Array.from(
-                    document.querySelectorAll(
-                        ".lesson-page"
-                    )
+                    document
+                        .querySelectorAll(
+                            ".lesson-page"
+                        )
                 )
                     .find(
                         isVisible
@@ -906,10 +1423,11 @@
 
             return (
                 Array.from(
-                    document.querySelectorAll(
-                        ".study-overlay," +
-                        ".study-tools-modal-overlay"
-                    )
+                    document
+                        .querySelectorAll(
+                            ".study-overlay," +
+                            ".study-tools-modal-overlay"
+                        )
                 )
                     .find(
                         isVisible
@@ -933,24 +1451,15 @@
             }
 
 
-            const id =
-                String(
+            const text =
+                `${
                     element.id ||
                     ""
-                )
-                    .toLowerCase();
-
-
-            const classes =
-                String(
+                } ${
                     element.className ||
                     ""
-                )
+                }`
                     .toLowerCase();
-
-
-            const text =
-                `${id} ${classes}`;
 
 
             if (
@@ -960,7 +1469,7 @@
                 text.includes(
                     "ap1"
                 ) ||
-                id ===
+                element.id ===
                 "intro-ap-page"
             ) {
 
@@ -1074,9 +1583,10 @@
 
 
             const direct =
-                document.getElementById(
-                    config.pageId
-                );
+                document
+                    .getElementById(
+                        config.pageId
+                    );
 
 
             if (
@@ -1090,9 +1600,10 @@
 
             return (
                 Array.from(
-                    document.querySelectorAll(
-                        ".course-page"
-                    )
+                    document
+                        .querySelectorAll(
+                            ".course-page"
+                        )
                 )
                     .find(
                         function (
@@ -1118,33 +1629,34 @@
             visible
         ) {
 
-            DASHBOARD_SELECTORS.forEach(
-                function (
-                    selector
-                ) {
-
-                    const element =
-                        document.querySelector(
-                            selector
-                        );
-
-
-                    if (
-                        !element
+            DASHBOARD_SELECTORS
+                .forEach(
+                    function (
+                        selector
                     ) {
 
-                        return;
+                        const element =
+                            document
+                                .querySelector(
+                                    selector
+                                );
+
+
+                        if (
+                            element
+                        ) {
+
+                            element
+                                .classList
+                                .toggle(
+                                    "hidden",
+                                    !visible
+                                );
+
+                        }
 
                     }
-
-
-                    element.classList.toggle(
-                        "hidden",
-                        !visible
-                    );
-
-                }
-            );
+                );
 
         }
 
@@ -1152,9 +1664,10 @@
         function closeWeakOverlayDirect() {
 
             const overlay =
-                document.getElementById(
-                    "nsh-ux-weak-overlay"
-                );
+                document
+                    .getElementById(
+                        "nsh-ux-weak-overlay"
+                    );
 
 
             if (
@@ -1172,12 +1685,16 @@
                 );
 
 
-            overlay.classList.add(
-                "hidden"
-            );
+            overlay
+                .classList
+                .add(
+                    "hidden"
+                );
 
 
-            document.body.style.overflow =
+            document.body
+                .style
+                .overflow =
                 "";
 
 
@@ -1201,12 +1718,16 @@
             }
 
 
-            overlay.classList.add(
-                "hidden"
-            );
+            overlay
+                .classList
+                .add(
+                    "hidden"
+                );
 
 
-            document.body.style.overflow =
+            document.body
+                .style
+                .overflow =
                 "";
 
 
@@ -1232,9 +1753,11 @@
                         page
                     ) {
 
-                        page.classList.add(
-                            "hidden"
-                        );
+                        page
+                            .classList
+                            .add(
+                                "hidden"
+                            );
 
                     }
                 );
@@ -1274,6 +1797,7 @@
                     "That course page could not be opened."
                 );
 
+
                 return false;
 
             }
@@ -1282,6 +1806,7 @@
             closeWeakOverlayDirect();
 
             closeVisibleStudyOverlayDirect();
+
 
             setDashboardVisible(
                 false
@@ -1298,17 +1823,21 @@
                         item
                     ) {
 
-                        item.classList.add(
-                            "hidden"
-                        );
+                        item
+                            .classList
+                            .add(
+                                "hidden"
+                            );
 
                     }
                 );
 
 
-            page.classList.remove(
-                "hidden"
-            );
+            page
+                .classList
+                .remove(
+                    "hidden"
+                );
 
 
             rememberedCourseId =
@@ -1326,16 +1855,16 @@
 
 
         // ====================================================================
-        // FIX 1
-        // STUDY COMMAND CENTER ONLY ON DASHBOARD
+        // STUDY COMMAND CENTER - DASHBOARD ONLY
         // ====================================================================
 
         function syncCommandCenterVisibility() {
 
             const commandCenter =
-                document.getElementById(
-                    "study-command-center"
-                );
+                document
+                    .getElementById(
+                        "study-command-center"
+                    );
 
 
             if (
@@ -1362,19 +1891,26 @@
                 );
 
 
+            const dashboardIntro =
+                document
+                    .querySelector(
+                        ".dashboard-intro"
+                    );
+
+
             if (
-                insideCourse
+                !insideCourse &&
+                dashboardIntro &&
+                isVisible(
+                    dashboardIntro
+                )
             ) {
 
-                commandCenter.classList.add(
-                    "hidden"
-                );
-
-            } else {
-
-                commandCenter.classList.remove(
-                    "hidden"
-                );
+                commandCenter
+                    .classList
+                    .remove(
+                        "hidden"
+                    );
 
             }
 
@@ -1448,8 +1984,7 @@
 
 
         // ====================================================================
-        // FIX 5
-        // DAILY STUDY PLAN REMEMBERS SELECTED TIME
+        // DAILY STUDY PLAN TIME MEMORY
         // ====================================================================
 
         function validPlannerMinutes(
@@ -1457,19 +1992,18 @@
         ) {
 
             return [
-
                 30,
                 45,
                 60,
                 90,
                 120,
                 180
-
-            ].includes(
-                Number(
-                    value
-                )
-            );
+            ]
+                .includes(
+                    Number(
+                        value
+                    )
+                );
 
         }
 
@@ -1478,9 +2012,10 @@
 
             const saved =
                 Number(
-                    localStorage.getItem(
-                        PLAN_CHOICE_KEY
-                    )
+                    localStorage
+                        .getItem(
+                            PLAN_CHOICE_KEY
+                        )
                 );
 
 
@@ -1528,27 +2063,22 @@
         ) {
 
             if (
-                !validPlannerMinutes(
+                validPlannerMinutes(
                     value
                 )
             ) {
 
-                return;
+                localStorage
+                    .setItem(
+                        PLAN_CHOICE_KEY,
+                        String(
+                            Number(
+                                value
+                            )
+                        )
+                    );
 
             }
-
-
-            localStorage.setItem(
-
-                PLAN_CHOICE_KEY,
-
-                String(
-                    Number(
-                        value
-                    )
-                )
-
-            );
 
         }
 
@@ -1556,9 +2086,10 @@
         function restorePlannerChoice() {
 
             const select =
-                document.getElementById(
-                    "planner-minutes"
-                );
+                document
+                    .getElementById(
+                        "planner-minutes"
+                    );
 
 
             if (
@@ -1607,7 +2138,231 @@
 
 
         // ====================================================================
-        // WEAK-AREA STORAGE
+        // MOBILE KEYBOARD / FORM VISIBILITY
+        // ====================================================================
+
+        function updateVisualViewportHeight() {
+
+            const height =
+                window.visualViewport
+                    ? window
+                        .visualViewport
+                        .height
+                    : window
+                        .innerHeight;
+
+
+            document
+                .documentElement
+                .style
+                .setProperty(
+                    "--nsh-visual-height",
+                    `${
+                        Math.round(
+                            height
+                        )
+                    }px`
+                );
+
+        }
+
+
+        function isEditableField(
+            element
+        ) {
+
+            if (
+                !(
+                    element instanceof
+                    HTMLElement
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            return Boolean(
+                element
+                    .matches(
+                        "input," +
+                        "textarea," +
+                        "select," +
+                        "[contenteditable='true']"
+                    )
+            );
+
+        }
+
+
+        function isInsidePopup(
+            element
+        ) {
+
+            return Boolean(
+                element
+                    .closest(
+                        ".study-tools-modal," +
+                        ".study-modal," +
+                        ".nsh-ux-weak-modal"
+                    )
+            );
+
+        }
+
+
+        function keepFocusedFieldVisible(
+            element
+        ) {
+
+            if (
+                !isEditableField(
+                    element
+                ) ||
+                !isInsidePopup(
+                    element
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            clearTimeout(
+                focusScrollTimer
+            );
+
+
+            focusScrollTimer =
+                setTimeout(
+                    function () {
+
+                        if (
+                            document
+                                .activeElement !==
+                            element
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        element
+                            .scrollIntoView({
+
+                                behavior:
+                                    window
+                                        .matchMedia(
+                                            "(prefers-reduced-motion: reduce)"
+                                        )
+                                        .matches
+                                        ? "auto"
+                                        : "smooth",
+
+                                block:
+                                    "center",
+
+                                inline:
+                                    "nearest"
+
+                            });
+
+                    },
+                    260
+                );
+
+        }
+
+
+        function keepActivePopupFieldVisible() {
+
+            const active =
+                document
+                    .activeElement;
+
+
+            if (
+                isEditableField(
+                    active
+                ) &&
+                isInsidePopup(
+                    active
+                )
+            ) {
+
+                keepFocusedFieldVisible(
+                    active
+                );
+
+            }
+
+        }
+
+
+        document
+            .addEventListener(
+                "focusin",
+                function (
+                    event
+                ) {
+
+                    keepFocusedFieldVisible(
+                        event.target
+                    );
+
+                },
+                true
+            );
+
+
+        if (
+            window
+                .visualViewport
+        ) {
+
+            window
+                .visualViewport
+                .addEventListener(
+                    "resize",
+                    function () {
+
+                        updateVisualViewportHeight();
+
+                        keepActivePopupFieldVisible();
+
+                    }
+                );
+
+
+            window
+                .visualViewport
+                .addEventListener(
+                    "scroll",
+                    function () {
+
+                        keepActivePopupFieldVisible();
+
+                    }
+                );
+
+        }
+
+
+        window
+            .addEventListener(
+                "resize",
+                updateVisualViewportHeight
+            );
+
+
+        updateVisualViewportHeight();
+
+
+        // ====================================================================
+        // WEAK AREA DATA
         // ====================================================================
 
         function parseArray(
@@ -1623,9 +2378,10 @@
                     );
 
 
-                return Array.isArray(
-                    parsed
-                )
+                return Array
+                    .isArray(
+                        parsed
+                    )
                     ? parsed
                     : [];
 
@@ -1651,30 +2407,27 @@
 
 
             const suffixes = [
-
                 "_missed",
-
                 "_weak_questions",
-
                 "_weakquestions",
-
                 "_weak"
-
             ];
 
 
             const suffix =
-                suffixes.find(
-                    function (
-                        item
-                    ) {
-
-                        return lower.endsWith(
+                suffixes
+                    .find(
+                        function (
                             item
-                        );
+                        ) {
 
-                    }
-                );
+                            return lower
+                                .endsWith(
+                                    item
+                                );
+
+                        }
+                    );
 
 
             if (
@@ -1704,9 +2457,10 @@
                 ) {
 
                     if (
-                        !key.startsWith(
-                            prefix
-                        )
+                        !key
+                            .startsWith(
+                                prefix
+                            )
                     ) {
 
                         continue;
@@ -1773,53 +2527,48 @@
             }
 
 
-            const coursePage =
+            const scope =
                 findCoursePage(
                     courseId
-                );
-
-
-            const scope =
-                coursePage ||
+                ) ||
                 document;
 
 
             return (
                 Array.from(
-                    scope.querySelectorAll(
-                        ".topic-card"
-                    )
+                    scope
+                        .querySelectorAll(
+                            ".topic-card"
+                        )
                 )
                     .find(
                         function (
                             card
                         ) {
 
-                            const values =
-                                Object.values(
+                            return Object
+                                .values(
                                     card.dataset ||
                                     {}
+                                )
+                                .some(
+                                    function (
+                                        value
+                                    ) {
+
+                                        return (
+                                            String(
+                                                value
+                                            )
+                                                .replaceAll(
+                                                    "_",
+                                                    "-"
+                                                ) ===
+                                            topicId
+                                        );
+
+                                    }
                                 );
-
-
-                            return values.some(
-                                function (
-                                    value
-                                ) {
-
-                                    return (
-                                        String(
-                                            value
-                                        )
-                                            .replaceAll(
-                                                "_",
-                                                "-"
-                                            ) ===
-                                        topicId
-                                    );
-
-                                }
-                            );
 
                         }
                     ) ||
@@ -1842,9 +2591,10 @@
 
 
             const heading =
-                card?.querySelector(
-                    "h3"
-                );
+                card
+                    ?.querySelector(
+                        "h3"
+                    );
 
 
             if (
@@ -1867,7 +2617,8 @@
                 return (
                     COURSE_CONFIG[
                         courseId
-                    ]?.name ||
+                    ]
+                        ?.name ||
                     "Weak Questions"
                 );
 
@@ -1908,9 +2659,10 @@
             ) {
 
                 const key =
-                    localStorage.key(
-                        i
-                    );
+                    localStorage
+                        .key(
+                            i
+                        );
 
 
                 if (
@@ -1939,9 +2691,10 @@
 
                 const items =
                     parseArray(
-                        localStorage.getItem(
-                            key
-                        )
+                        localStorage
+                            .getItem(
+                                key
+                            )
                     );
 
 
@@ -1955,41 +2708,47 @@
 
 
                 const identity =
-                    `${info.courseId}::${info.topicId || "mixed"}`;
+                    `${info.courseId}::${
+                        info.topicId ||
+                        "mixed"
+                    }`;
 
 
                 if (
-                    !map.has(
-                        identity
-                    )
+                    !map
+                        .has(
+                            identity
+                        )
                 ) {
 
-                    map.set(
-                        identity,
-                        {
+                    map
+                        .set(
+                            identity,
+                            {
 
-                            courseId:
-                                info.courseId,
+                                courseId:
+                                    info.courseId,
 
-                            topicId:
-                                info.topicId,
+                                topicId:
+                                    info.topicId,
 
-                            ids:
-                                [],
+                                ids:
+                                    [],
 
-                            sourceKeys:
-                                []
+                                sourceKeys:
+                                    []
 
-                        }
-                    );
+                            }
+                        );
 
                 }
 
 
                 const group =
-                    map.get(
-                        identity
-                    );
+                    map
+                        .get(
+                            identity
+                        );
 
 
                 group
@@ -2001,50 +2760,58 @@
 
                 const existing =
                     new Set(
-                        group.ids.map(
-                            String
-                        )
+                        group
+                            .ids
+                            .map(
+                                String
+                            )
                     );
 
 
-                items.forEach(
-                    function (
-                        item
-                    ) {
-
-                        const value =
-                            typeof item ===
-                            "object"
-                                ? String(
-                                    item?.id ??
-                                    item?.questionId ??
-                                    JSON.stringify(
-                                        item
-                                    )
-                                )
-                                : String(
-                                    item
-                                );
-
-
-                        if (
-                            !existing.has(
-                                value
-                            )
+                items
+                    .forEach(
+                        function (
+                            item
                         ) {
 
-                            existing.add(
-                                value
-                            );
+                            const value =
+                                typeof item ===
+                                "object"
+                                    ? String(
+                                        item?.id ??
+                                        item?.questionId ??
+                                        JSON.stringify(
+                                            item
+                                        )
+                                    )
+                                    : String(
+                                        item
+                                    );
 
-                            group.ids.push(
-                                item
-                            );
+
+                            if (
+                                !existing
+                                    .has(
+                                        value
+                                    )
+                            ) {
+
+                                existing
+                                    .add(
+                                        value
+                                    );
+
+
+                                group
+                                    .ids
+                                    .push(
+                                        item
+                                    );
+
+                            }
 
                         }
-
-                    }
-                );
+                    );
 
             }
 
@@ -2058,7 +2825,8 @@
 
             const alreadyHasTeas =
                 Array.from(
-                    map.values()
+                    map
+                        .values()
                 )
                     .some(
                         function (
@@ -2080,28 +2848,32 @@
                 Array.isArray(
                     teasStats.weak
                 ) &&
-                teasStats.weak.length
+                teasStats
+                    .weak
+                    .length
             ) {
 
-                map.set(
-                    "teas::mixed",
-                    {
+                map
+                    .set(
+                        "teas::mixed",
+                        {
 
-                        courseId:
-                            "teas",
+                            courseId:
+                                "teas",
 
-                        topicId:
-                            "",
+                            topicId:
+                                "",
 
-                        ids:
-                            teasStats.weak,
+                            ids:
+                                teasStats.weak,
 
-                        sourceKeys: [
-                            "nshTEAS_FINAL_STATS"
-                        ]
+                            sourceKeys:
+                                [
+                                    "nshTEAS_FINAL_STATS"
+                                ]
 
-                    }
-                );
+                        }
+                    );
 
             }
 
@@ -2119,7 +2891,9 @@
                             ...group,
 
                             count:
-                                group.ids.length,
+                                group
+                                    .ids
+                                    .length,
 
                             title:
                                 getTopicTitle(
@@ -2145,25 +2919,21 @@
                                 .localeCompare(
                                     COURSE_CONFIG[
                                         b.courseId
-                                    ].name
+                                    ]
+                                        .name
                                 );
 
 
-                        if (
+                        return (
                             courseCompare !==
                             0
-                        ) {
-
-                            return courseCompare;
-
-                        }
-
-
-                        return a
-                            .title
-                            .localeCompare(
-                                b.title
-                            );
+                        )
+                            ? courseCompare
+                            : a
+                                .title
+                                .localeCompare(
+                                    b.title
+                                );
 
                     }
                 );
@@ -2181,8 +2951,15 @@
                 );
 
 
+            const config =
+                COURSE_CONFIG[
+                    courseId
+                ];
+
+
             if (
-                !page
+                !page ||
+                !config
             ) {
 
                 return null;
@@ -2190,69 +2967,22 @@
             }
 
 
-            const preferred = {
-
-                anatomy1: [
-                    "#anatomy1-weak-button",
-                    "#ap1-weak-button"
-                ],
-
-                anatomy2: [
-                    "#ap2-weak-button",
-                    "#anatomy2-weak-button"
-                ],
-
-                chemistry: [
-                    "#chem-weak-button"
-                ],
-
-                microbiology: [
-                    "#micro-weak-button",
-                    "#microbiology-weak-button"
-                ],
-
-                statistics: [
-                    "#stat-weak-button",
-                    "#statistics-weak-button"
-                ],
-
-                nutrition: [
-                    "#nut-weak-button",
-                    "#nutrition-weak-button"
-                ],
-
-                labs: [
-                    "#lab-weak-button",
-                    "#labs-weak-button"
-                ],
-
-                teas: [
-                    "#teas-weak",
-                    "#teas-weak-button",
-                    "#teas-weakness-button"
-                ]
-
-            };
-
-
             for (
                 const selector
                 of
-                preferred[
-                    courseId
-                ] ||
+                config.weakButtons ||
                 []
             ) {
 
                 const button =
-
-                    page.querySelector(
-                        selector
-                    ) ||
-
-                    document.querySelector(
-                        selector
-                    );
+                    page
+                        .querySelector(
+                            selector
+                        ) ||
+                    document
+                        .querySelector(
+                            selector
+                        );
 
 
                 if (
@@ -2268,9 +2998,10 @@
 
             return (
                 Array.from(
-                    page.querySelectorAll(
-                        "button"
-                    )
+                    page
+                        .querySelectorAll(
+                            "button"
+                        )
                 )
                     .find(
                         function (
@@ -2285,19 +3016,15 @@
 
 
                             return (
-
                                 text.includes(
                                     "weak area"
                                 ) ||
-
                                 text.includes(
                                     "weak question"
                                 ) ||
-
                                 text.includes(
                                     "weakness"
                                 )
-
                             );
 
                         }
@@ -2309,16 +3036,16 @@
 
 
         // ====================================================================
-        // FIX 2
         // FOCUSED WEAK AREA CENTER
         // ====================================================================
 
         function ensureWeakOverlay() {
 
             let overlay =
-                document.getElementById(
-                    "nsh-ux-weak-overlay"
-                );
+                document
+                    .getElementById(
+                        "nsh-ux-weak-overlay"
+                    );
 
 
             if (
@@ -2331,9 +3058,10 @@
 
 
             overlay =
-                document.createElement(
-                    "div"
-                );
+                document
+                    .createElement(
+                        "div"
+                    );
 
 
             overlay.id =
@@ -2344,22 +3072,25 @@
                 "hidden";
 
 
-            overlay.setAttribute(
-                "role",
-                "dialog"
-            );
+            overlay
+                .setAttribute(
+                    "role",
+                    "dialog"
+                );
 
 
-            overlay.setAttribute(
-                "aria-modal",
-                "true"
-            );
+            overlay
+                .setAttribute(
+                    "aria-modal",
+                    "true"
+                );
 
 
-            overlay.setAttribute(
-                "aria-label",
-                "Focused weak area review"
-            );
+            overlay
+                .setAttribute(
+                    "aria-label",
+                    "Focused weak area review"
+                );
 
 
             overlay.innerHTML = `
@@ -2377,6 +3108,7 @@
                             >
                                 ← Back
                             </button>
+
 
                             <div>
 
@@ -2421,9 +3153,10 @@
             `;
 
 
-            document.body.appendChild(
-                overlay
-            );
+            document.body
+                .appendChild(
+                    overlay
+                );
 
 
             document
@@ -2432,11 +3165,7 @@
                 )
                 .addEventListener(
                     "click",
-                    function () {
-
-                        navigateBack();
-
-                    }
+                    navigateBack
                 );
 
 
@@ -2446,31 +3175,18 @@
                 )
                 .addEventListener(
                     "click",
-                    function () {
-
-                        navigateBack();
-
-                    }
+                    navigateBack
                 );
 
 
-            overlay.addEventListener(
-                "click",
-                function (
-                    event
-                ) {
-
-                    if (
-                        event.target ===
-                        overlay
-                    ) {
-
-                        navigateBack();
-
-                    }
-
-                }
-            );
+            /*
+             * IMPORTANT:
+             * There is intentionally NO click-on-background
+             * event here.
+             *
+             * The popup must stay open until the user
+             * deliberately presses Back or X.
+             */
 
 
             return overlay;
@@ -2495,12 +3211,16 @@
             renderWeakOverlay();
 
 
-            overlay.classList.remove(
-                "hidden"
-            );
+            overlay
+                .classList
+                .remove(
+                    "hidden"
+                );
 
 
-            document.body.style.overflow =
+            document.body
+                .style
+                .overflow =
                 "hidden";
 
 
@@ -2562,11 +3282,9 @@
 
 
                             <h3>
-
                                 ${escapeHTML(
                                     group.title
                                 )}
-
                             </h3>
 
 
@@ -2655,9 +3373,10 @@
         function renderWeakOverlay() {
 
             const body =
-                document.getElementById(
-                    "nsh-ux-weak-body"
-                );
+                document
+                    .getElementById(
+                        "nsh-ux-weak-body"
+                    );
 
 
             if (
@@ -2677,48 +3396,51 @@
                 activeWeakFilter ===
                 "all"
                     ? groups
-                    : groups.filter(
+                    : groups
+                        .filter(
+                            function (
+                                group
+                            ) {
+
+                                return (
+                                    group.courseId ===
+                                    activeWeakFilter
+                                );
+
+                            }
+                        );
+
+
+            const total =
+                groups
+                    .reduce(
                         function (
+                            sum,
                             group
                         ) {
 
                             return (
-                                group.courseId ===
-                                activeWeakFilter
+                                sum +
+                                group.count
                             );
 
-                        }
+                        },
+                        0
                     );
-
-
-            const total =
-                groups.reduce(
-                    function (
-                        sum,
-                        group
-                    ) {
-
-                        return (
-                            sum +
-                            group.count
-                        );
-
-                    },
-                    0
-                );
 
 
             const courseCount =
                 new Set(
-                    groups.map(
-                        function (
-                            group
-                        ) {
+                    groups
+                        .map(
+                            function (
+                                group
+                            ) {
 
-                            return group.courseId;
+                                return group.courseId;
 
-                        }
-                    )
+                            }
+                        )
                 )
                     .size;
 
@@ -2825,7 +3547,9 @@
                         }
                     )
 
-            ].join("");
+            ].join(
+                ""
+            );
 
 
             body.innerHTML = `
@@ -2891,7 +3615,9 @@
                                         .map(
                                             renderWeakCard
                                         )
-                                        .join("")
+                                        .join(
+                                            ""
+                                        )
                                 }
 
                             </div>
@@ -2931,19 +3657,21 @@
                         button
                     ) {
 
-                        button.addEventListener(
-                            "click",
-                            function () {
+                        button
+                            .addEventListener(
+                                "click",
+                                function () {
 
-                                activeWeakFilter =
-                                    button.dataset
-                                        .uxFilter;
+                                    activeWeakFilter =
+                                        button
+                                            .dataset
+                                            .uxFilter;
 
 
-                                renderWeakOverlay();
+                                    renderWeakOverlay();
 
-                            }
-                        );
+                                }
+                            );
 
                     }
                 );
@@ -2958,22 +3686,25 @@
                         button
                     ) {
 
-                        button.addEventListener(
-                            "click",
-                            function () {
+                        button
+                            .addEventListener(
+                                "click",
+                                function () {
 
-                                openExactWeakTopic(
+                                    openExactWeakTopic(
 
-                                    button.dataset
-                                        .uxCourse,
+                                        button
+                                            .dataset
+                                            .uxCourse,
 
-                                    button.dataset
-                                        .uxOpenTopic
+                                        button
+                                            .dataset
+                                            .uxOpenTopic
 
-                                );
+                                    );
 
-                            }
-                        );
+                                }
+                            );
 
                     }
                 );
@@ -2988,19 +3719,19 @@
                         button
                     ) {
 
-                        button.addEventListener(
-                            "click",
-                            function () {
+                        button
+                            .addEventListener(
+                                "click",
+                                function () {
 
-                                openNativeWeakPractice(
+                                    openNativeWeakPractice(
+                                        button
+                                            .dataset
+                                            .uxPracticeCourse
+                                    );
 
-                                    button.dataset
-                                        .uxPracticeCourse
-
-                                );
-
-                            }
-                        );
+                                }
+                            );
 
                     }
                 );
@@ -3012,25 +3743,11 @@
             courseId
         ) {
 
-            const config =
-                COURSE_CONFIG[
-                    courseId
-                ];
-
-
-            if (
-                !config
-            ) {
-
-                return false;
-
-            }
-
-
             const card =
-                document.querySelector(
-                    `.course-card[data-course="${config.card}"]`
-                );
+                document
+                    .querySelector(
+                        `.course-card[data-course="${courseId}"]`
+                    );
 
 
             rememberedCourseId =
@@ -3078,6 +3795,7 @@
 
                 historySuppressed =
                     false;
+
 
                 return;
 
@@ -3168,6 +3886,7 @@
                 historySuppressed =
                     false;
 
+
                 return;
 
             }
@@ -3233,16 +3952,16 @@
 
 
         // ====================================================================
-        // FIX 3 + 4
-        // STEP-BY-STEP HISTORY + iPHONE SWIPE BACK
+        // STEP-BY-STEP / BROWSER / IPHONE BACK
         // ====================================================================
 
         function getViewSnapshot() {
 
             const weakOverlay =
-                document.getElementById(
-                    "nsh-ux-weak-overlay"
-                );
+                document
+                    .getElementById(
+                        "nsh-ux-weak-overlay"
+                    );
 
 
             const studyOverlay =
@@ -3366,7 +4085,9 @@
 
                 snapshot.overlayId
 
-            ].join("|");
+            ].join(
+                "|"
+            );
 
         }
 
@@ -3426,19 +4147,12 @@
             }
 
 
-            if (
+            return (
                 previous.baseType ===
                 "course" &&
                 next.baseType ===
                 "dashboard"
-            ) {
-
-                return true;
-
-            }
-
-
-            return false;
+            );
 
         }
 
@@ -3462,28 +4176,28 @@
                 );
 
 
-            history.replaceState(
+            history
+                .replaceState(
+                    {
 
-                {
+                        ...existing,
 
-                    ...existing,
+                        nshUx:
+                            true,
 
-                    nshUx:
-                        true,
+                        nshUxDepth:
+                            existingDepth,
 
-                    nshUxDepth:
-                        existingDepth,
+                        nshUxSnapshot:
+                            snapshot
 
-                    nshUxSnapshot:
-                        snapshot
+                    },
 
-                },
+                    "",
 
-                "",
+                    window.location.href
 
-                window.location.href
-
-            );
+                );
 
 
             lastHistorySnapshot =
@@ -3557,7 +4271,10 @@
                 )
             ) {
 
-                window.history.back();
+                window
+                    .history
+                    .back();
+
 
                 return;
 
@@ -3574,28 +4291,28 @@
                 {};
 
 
-            history.pushState(
+            history
+                .pushState(
+                    {
 
-                {
+                        ...existing,
 
-                    ...existing,
+                        nshUx:
+                            true,
 
-                    nshUx:
-                        true,
+                        nshUxDepth:
+                            nextDepth,
 
-                    nshUxDepth:
-                        nextDepth,
+                        nshUxSnapshot:
+                            snapshot
 
-                    nshUxSnapshot:
-                        snapshot
+                    },
 
-                },
+                    "",
 
-                "",
+                    window.location.href
 
-                window.location.href
-
-            );
+                );
 
 
             lastHistorySnapshot =
@@ -3664,9 +4381,11 @@
                         page
                     ) {
 
-                        page.classList.add(
-                            "hidden"
-                        );
+                        page
+                            .classList
+                            .add(
+                                "hidden"
+                            );
 
                     }
                 );
@@ -3690,9 +4409,10 @@
 
                 const page =
                     snapshot.baseId
-                        ? document.getElementById(
-                            snapshot.baseId
-                        )
+                        ? document
+                            .getElementById(
+                                snapshot.baseId
+                            )
                         : null;
 
 
@@ -3700,9 +4420,11 @@
                     page
                 ) {
 
-                    page.classList.remove(
-                        "hidden"
-                    );
+                    page
+                        .classList
+                        .remove(
+                            "hidden"
+                        );
 
                 } else if (
                     snapshot.baseType ===
@@ -3720,9 +4442,11 @@
                         coursePage
                     ) {
 
-                        coursePage.classList.remove(
-                            "hidden"
-                        );
+                        coursePage
+                            .classList
+                            .remove(
+                                "hidden"
+                            );
 
                     } else {
 
@@ -3768,21 +4492,26 @@
             ) {
 
                 const overlay =
-                    document.getElementById(
-                        snapshot.overlayId
-                    );
+                    document
+                        .getElementById(
+                            snapshot.overlayId
+                        );
 
 
                 if (
                     overlay
                 ) {
 
-                    overlay.classList.remove(
-                        "hidden"
-                    );
+                    overlay
+                        .classList
+                        .remove(
+                            "hidden"
+                        );
 
 
-                    document.body.style.overflow =
+                    document.body
+                        .style
+                        .overflow =
                         "hidden";
 
                 }
@@ -3795,6 +4524,8 @@
             ensureModalBackButtons();
 
             restorePlannerChoice();
+
+            updateVisualViewportHeight();
 
             scrollToTop();
 
@@ -3825,9 +4556,10 @@
         function directBackOneStep() {
 
             const weakOverlay =
-                document.getElementById(
-                    "nsh-ux-weak-overlay"
-                );
+                document
+                    .getElementById(
+                        "nsh-ux-weak-overlay"
+                    );
 
 
             if (
@@ -3839,6 +4571,7 @@
 
                 closeWeakOverlayDirect();
 
+
                 return;
 
             }
@@ -3849,6 +4582,7 @@
             ) {
 
                 scheduleViewSync();
+
 
                 return;
 
@@ -3864,9 +4598,7 @@
             ) {
 
                 const courseId =
-
                     rememberedCourseId ||
-
                     inferCourseIdFromElement(
                         lesson
                     );
@@ -3885,6 +4617,7 @@
 
 
                 showDashboardDirect();
+
 
                 return;
 
@@ -3910,7 +4643,10 @@
                 0
             ) {
 
-                window.history.back();
+                window
+                    .history
+                    .back();
+
 
                 return;
 
@@ -3922,35 +4658,36 @@
         }
 
 
-        window.addEventListener(
-            "popstate",
-            function (
-                event
-            ) {
-
-                if (
-                    !event.state
-                        ?.nshUx ||
-                    !event.state
-                        ?.nshUxSnapshot
+        window
+            .addEventListener(
+                "popstate",
+                function (
+                    event
                 ) {
 
-                    return;
+                    if (
+                        !event.state
+                            ?.nshUx ||
+                        !event.state
+                            ?.nshUxSnapshot
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    restoreSnapshot(
+                        event.state
+                            .nshUxSnapshot
+                    );
 
                 }
-
-
-                restoreSnapshot(
-                    event.state
-                        .nshUxSnapshot
-                );
-
-            }
-        );
+            );
 
 
         // ====================================================================
-        // BACK BUTTON INSIDE QUIZ / TOOL MODALS
+        // BACK BUTTON INSIDE POPUPS
         // ====================================================================
 
         function ensureModalBackButtons() {
@@ -3966,9 +4703,10 @@
                     ) {
 
                         if (
-                            header.querySelector(
-                                ".nsh-ux-modal-back"
-                            )
+                            header
+                                .querySelector(
+                                    ".nsh-ux-modal-back"
+                                )
                         ) {
 
                             return;
@@ -3977,9 +4715,10 @@
 
 
                         const button =
-                            document.createElement(
-                                "button"
-                            );
+                            document
+                                .createElement(
+                                    "button"
+                                );
 
 
                         button.type =
@@ -3994,30 +4733,37 @@
                             "← Back";
 
 
-                        button.setAttribute(
-                            "aria-label",
-                            "Go back one step"
-                        );
+                        button
+                            .setAttribute(
+                                "aria-label",
+                                "Go back one step"
+                            );
 
 
-                        button.addEventListener(
-                            "click",
-                            function (
-                                event
-                            ) {
+                        button
+                            .addEventListener(
+                                "click",
+                                function (
+                                    event
+                                ) {
 
-                                event.preventDefault();
+                                    event
+                                        .preventDefault();
 
-                                event.stopPropagation();
 
-                                navigateBack();
+                                    event
+                                        .stopPropagation();
 
-                            }
-                        );
+
+                                    navigateBack();
+
+                                }
+                            );
 
 
                         const first =
-                            header.firstElementChild;
+                            header
+                                .firstElementChild;
 
 
                         if (
@@ -4025,42 +4771,49 @@
                         ) {
 
                             const wrapper =
-                                document.createElement(
-                                    "div"
-                                );
+                                document
+                                    .createElement(
+                                        "div"
+                                    );
 
 
                             wrapper.className =
                                 "nsh-ux-modal-header-left";
 
 
-                            header.insertBefore(
-                                wrapper,
-                                first
-                            );
+                            header
+                                .insertBefore(
+                                    wrapper,
+                                    first
+                                );
 
 
-                            wrapper.appendChild(
-                                button
-                            );
+                            wrapper
+                                .appendChild(
+                                    button
+                                );
 
 
-                            wrapper.appendChild(
-                                first
-                            );
+                            wrapper
+                                .appendChild(
+                                    first
+                                );
 
                         } else {
 
-                            header.prepend(
-                                button
-                            );
+                            header
+                                .prepend(
+                                    button
+                                );
 
                         }
 
 
-                        header.classList.add(
-                            "nsh-ux-header-with-back"
-                        );
+                        header
+                            .classList
+                            .add(
+                                "nsh-ux-header-with-back"
+                            );
 
                     }
                 );
@@ -4069,295 +4822,379 @@
 
 
         // ====================================================================
-        // GLOBAL USER ACTIONS
+        // POPUP OUTSIDE-CLICK PROTECTION
         // ====================================================================
 
-        document.addEventListener(
+        function isPopupBackdropClick(
+            target
+        ) {
 
-            "change",
-
-            function (
-                event
+            if (
+                !(
+                    target instanceof
+                    Element
+                )
             ) {
 
-                if (
-                    event.target?.id ===
-                    "planner-minutes"
+                return false;
+
+            }
+
+
+            return (
+                target.matches(
+                    ".study-tools-modal-overlay"
+                ) ||
+                target.matches(
+                    ".study-overlay"
+                ) ||
+                target.id ===
+                "nsh-ux-weak-overlay"
+            );
+
+        }
+
+
+        // ====================================================================
+        // GLOBAL USER ACTIONS
+        //
+        // Window capture is intentional.
+        // This runs before document-level course/study-tool listeners.
+        // ====================================================================
+
+        window
+            .addEventListener(
+
+                "change",
+
+                function (
+                    event
                 ) {
-
-                    savePlannerChoice(
-                        event.target.value
-                    );
-
-                }
-
-            },
-
-            true
-
-        );
-
-
-        document.addEventListener(
-
-            "click",
-
-            function (
-                event
-            ) {
-
-                const target =
-                    event.target;
-
-
-                if (
-                    !(
-                        target instanceof
-                        Element
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                // ------------------------------------------------------------
-                // SAVE DAILY STUDY TIME
-                // ------------------------------------------------------------
-
-                const generatePlan =
-                    target.closest(
-                        "#generate-plan"
-                    );
-
-
-                if (
-                    generatePlan
-                ) {
-
-                    const select =
-                        document.getElementById(
-                            "planner-minutes"
-                        );
-
 
                     if (
-                        select
+                        event.target
+                            ?.id ===
+                        "planner-minutes"
                     ) {
 
                         savePlannerChoice(
-                            select.value
+                            event.target.value
                         );
 
                     }
 
-                }
+                },
+
+                true
+
+            );
 
 
-                // ------------------------------------------------------------
-                // FOCUSED WEAK AREAS
-                // ------------------------------------------------------------
+        window
+            .addEventListener(
 
-                const dashboardWeak =
-                    target.closest(
-                        "#weak-area-button"
-                    );
+                "click",
 
-
-                const toolWeak =
-                    target.closest(
-                        '[data-study-tool="weak"]'
-                    );
-
-
-                if (
-                    dashboardWeak ||
-                    toolWeak
+                function (
+                    event
                 ) {
 
-                    event.preventDefault();
-
-                    event.stopPropagation();
-
-                    event.stopImmediatePropagation();
+                    const target =
+                        event.target;
 
 
-                    openWeakOverlay();
-
-
-                    return;
-
-                }
-
-
-                // ------------------------------------------------------------
-                // WEBSITE BACK BUTTON
-                // ------------------------------------------------------------
-
-                const backButton =
-                    target.closest(
-                        ".back-button"
-                    );
-
-
-                if (
-                    backButton &&
-                    backButton.closest(
-                        ".course-page," +
-                        ".lesson-page"
-                    )
-                ) {
-
-                    event.preventDefault();
-
-                    event.stopPropagation();
-
-                    event.stopImmediatePropagation();
-
-
-                    navigateBack();
-
-
-                    return;
-
-                }
-
-
-                // ------------------------------------------------------------
-                // MODAL BACK BUTTON
-                // ------------------------------------------------------------
-
-                const modalBack =
-                    target.closest(
-                        ".nsh-ux-modal-back"
-                    );
-
-
-                if (
-                    modalBack
-                ) {
-
-                    return;
-
-                }
-
-
-                // ------------------------------------------------------------
-                // REMEMBER CURRENT COURSE
-                // ------------------------------------------------------------
-
-                const visibleCourse =
-                    getVisibleCoursePage();
-
-
-                if (
-                    visibleCourse &&
-                    (
-                        target.closest(
-                            ".topic-card"
-                        ) ||
-                        target.closest(
-                            ".topic-button"
+                    if (
+                        !(
+                            target instanceof
+                            Element
                         )
-                    )
-                ) {
+                    ) {
 
-                    rememberedCourseId =
+                        return;
 
-                        inferCourseIdFromElement(
-                            visibleCourse
-                        ) ||
-
-                        rememberedCourseId;
-
-                }
+                    }
 
 
-                const courseCard =
-                    target.closest(
-                        ".course-card[data-course]"
-                    );
+                    // ========================================================
+                    // DO NOT CLOSE ANY POPUP BY CLICKING/TAPPING OUTSIDE
+                    // ========================================================
 
-
-                if (
-                    courseCard
-                ) {
-
-                    rememberedCourseId =
-                        courseCard.dataset
-                            .course ||
-                        null;
-
-                }
-
-
-                // ------------------------------------------------------------
-                // AFTER NORMAL USER NAVIGATION:
-                // save the new view into browser history
-                // ------------------------------------------------------------
-
-                scheduleViewSync();
-
-                pushCurrentViewSoon();
-
-            },
-
-            true
-
-        );
-
-
-        document.addEventListener(
-            "keydown",
-            function (
-                event
-            ) {
-
-                if (
-                    event.key !==
-                    "Escape"
-                ) {
-
-                    return;
-
-                }
-
-
-                const weakOverlay =
-                    document.getElementById(
-                        "nsh-ux-weak-overlay"
-                    );
-
-
-                if (
-                    (
-                        weakOverlay &&
-                        isVisible(
-                            weakOverlay
+                    if (
+                        isPopupBackdropClick(
+                            target
                         )
-                    ) ||
-                    getVisibleStudyOverlay()
+                    ) {
+
+                        event
+                            .preventDefault();
+
+
+                        event
+                            .stopPropagation();
+
+
+                        event
+                            .stopImmediatePropagation();
+
+
+                        return;
+
+                    }
+
+
+                    // ========================================================
+                    // SAVE STUDY PLAN SELECTION
+                    // ========================================================
+
+                    const generatePlan =
+                        target
+                            .closest(
+                                "#generate-plan"
+                            );
+
+
+                    if (
+                        generatePlan
+                    ) {
+
+                        const select =
+                            document
+                                .getElementById(
+                                    "planner-minutes"
+                                );
+
+
+                        if (
+                            select
+                        ) {
+
+                            savePlannerChoice(
+                                select.value
+                            );
+
+                        }
+
+                    }
+
+
+                    // ========================================================
+                    // FOCUSED WEAK AREA CENTER
+                    // ========================================================
+
+                    const dashboardWeak =
+                        target
+                            .closest(
+                                "#weak-area-button"
+                            );
+
+
+                    const toolWeak =
+                        target
+                            .closest(
+                                '[data-study-tool="weak"]'
+                            );
+
+
+                    if (
+                        dashboardWeak ||
+                        toolWeak
+                    ) {
+
+                        event
+                            .preventDefault();
+
+
+                        event
+                            .stopPropagation();
+
+
+                        event
+                            .stopImmediatePropagation();
+
+
+                        openWeakOverlay();
+
+
+                        return;
+
+                    }
+
+
+                    // ========================================================
+                    // WEBSITE BACK BUTTON
+                    // ========================================================
+
+                    const backButton =
+                        target
+                            .closest(
+                                ".back-button"
+                            );
+
+
+                    if (
+                        backButton &&
+                        backButton
+                            .closest(
+                                ".course-page," +
+                                ".lesson-page"
+                            )
+                    ) {
+
+                        event
+                            .preventDefault();
+
+
+                        event
+                            .stopPropagation();
+
+
+                        event
+                            .stopImmediatePropagation();
+
+
+                        navigateBack();
+
+
+                        return;
+
+                    }
+
+
+                    // ========================================================
+                    // MODAL BACK BUTTON
+                    // ========================================================
+
+                    if (
+                        target
+                            .closest(
+                                ".nsh-ux-modal-back"
+                            )
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    // ========================================================
+                    // REMEMBER COURSE
+                    // ========================================================
+
+                    const courseCard =
+                        target
+                            .closest(
+                                ".course-card[data-course]"
+                            );
+
+
+                    if (
+                        courseCard
+                    ) {
+
+                        rememberedCourseId =
+                            courseCard
+                                .dataset
+                                .course ||
+                            null;
+
+                    }
+
+
+                    const visibleCourse =
+                        getVisibleCoursePage();
+
+
+                    if (
+                        visibleCourse &&
+                        (
+                            target
+                                .closest(
+                                    ".topic-card"
+                                ) ||
+                            target
+                                .closest(
+                                    ".topic-button"
+                                )
+                        )
+                    ) {
+
+                        rememberedCourseId =
+                            inferCourseIdFromElement(
+                                visibleCourse
+                            ) ||
+                            rememberedCourseId;
+
+                    }
+
+
+                    scheduleViewSync();
+
+                    pushCurrentViewSoon();
+
+                },
+
+                true
+
+            );
+
+
+        document
+            .addEventListener(
+                "keydown",
+                function (
+                    event
                 ) {
 
-                    event.preventDefault();
+                    if (
+                        event.key !==
+                        "Escape"
+                    ) {
 
-                    navigateBack();
+                        return;
+
+                    }
+
+
+                    const weakOverlay =
+                        document
+                            .getElementById(
+                                "nsh-ux-weak-overlay"
+                            );
+
+
+                    if (
+                        (
+                            weakOverlay &&
+                            isVisible(
+                                weakOverlay
+                            )
+                        ) ||
+                        getVisibleStudyOverlay()
+                    ) {
+
+                        event
+                            .preventDefault();
+
+
+                        navigateBack();
+
+                    }
 
                 }
-
-            }
-        );
+            );
 
 
-        window.addEventListener(
-            "pageshow",
-            function () {
+        window
+            .addEventListener(
+                "pageshow",
+                function () {
 
-                scheduleViewSync();
+                    updateVisualViewportHeight();
 
-            }
-        );
+                    scheduleViewSync();
+
+                }
+            );
 
 
         // ====================================================================
@@ -4373,6 +5210,8 @@
         restorePlannerChoice();
 
         syncCommandCenterVisibility();
+
+        updateVisualViewportHeight();
 
 
         setTimeout(
@@ -4392,7 +5231,7 @@
 
 
         console.log(
-            "✅ Nursing Prep Lab UX fixes loaded: dashboard-only tools, focused weak review, step-by-step back, iPhone swipe-back and planner memory."
+            "✅ Nursing Prep Lab UX fixes loaded: dashboard-only tools, focused weak review, step-back navigation, mobile keyboard support, protected popups and planner memory."
         );
 
     });

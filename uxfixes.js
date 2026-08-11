@@ -3,13 +3,12 @@
 // UX FIXES
 //
 // 1. Study Command Center appears only on the dashboard
-// 2. Weak Areas opens a focused topic-by-topic review center
-// 3. Back buttons move one step at a time
-// 4. Daily Study Plan remembers the user's selected study time
+// 2. Weak Areas opens focused topic-by-topic review
+// 3. Back works one step at a time
+// 4. iPhone/Safari swipe-back and browser Back work inside the app
+// 5. Daily Study Plan remembers the selected study time
 //
-// IMPORTANT:
-// This file intentionally uses NO MutationObserver and NO repeating timer.
-// It reacts only to real user actions so it stays lightweight.
+// No MutationObserver. No repeating timer.
 // ============================================================================
 
 (function () {
@@ -17,21 +16,25 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        // ====================================================================
-        // SETTINGS
-        // ====================================================================
-
         const PLAN_KEY = "nshTOOLS_daily_plan";
         const PLAN_CHOICE_KEY = "nshUX_planner_minutes";
 
-        const COURSE_CONFIG = {
+        const DASHBOARD_SELECTORS = [
+            ".dashboard-intro",
+            ".progress-overview",
+            "#study-command-center",
+            ".courses-section",
+            ".weak-areas-section",
+            "footer"
+        ];
 
+        const COURSE_CONFIG = {
             anatomy1: {
                 name: "Anatomy & Physiology I",
                 icon: "🫀",
                 card: "anatomy1",
                 pageId: "anatomy1-page",
-                weakSelector: ""
+                prefixes: ["nshAP1_"]
             },
 
             anatomy2: {
@@ -39,7 +42,7 @@
                 icon: "❤️",
                 card: "anatomy2",
                 pageId: "anatomy2-page",
-                weakSelector: "#ap2-weak-button"
+                prefixes: ["nshAP2_"]
             },
 
             chemistry: {
@@ -47,7 +50,10 @@
                 icon: "🧪",
                 card: "chemistry",
                 pageId: "chemistry-page",
-                weakSelector: "#chem-weak-button"
+                prefixes: [
+                    "nshCHEM_FINAL_",
+                    "nshCHEM_"
+                ]
             },
 
             microbiology: {
@@ -55,7 +61,10 @@
                 icon: "🦠",
                 card: "microbiology",
                 pageId: "microbiology-page",
-                weakSelector: "#micro-weak-button"
+                prefixes: [
+                    "nshMICRO_FINAL_",
+                    "nshMICRO_"
+                ]
             },
 
             statistics: {
@@ -63,7 +72,7 @@
                 icon: "📊",
                 card: "statistics",
                 pageId: "statistics-page",
-                weakSelector: "#stat-weak-button"
+                prefixes: ["nshSTAT_"]
             },
 
             nutrition: {
@@ -71,7 +80,10 @@
                 icon: "🍎",
                 card: "nutrition",
                 pageId: "nutrition-page",
-                weakSelector: "#nut-weak-button"
+                prefixes: [
+                    "nshNUT_FINAL_",
+                    "nshNUT_"
+                ]
             },
 
             labs: {
@@ -79,7 +91,11 @@
                 icon: "🔬",
                 card: "labs",
                 pageId: "lab-center-page",
-                weakSelector: "#lab-weak-button"
+                prefixes: [
+                    "nshLABS_",
+                    "nshLAB_",
+                    "nshSCIENCELAB_"
+                ]
             },
 
             teas: {
@@ -87,54 +103,20 @@
                 icon: "🎓",
                 card: "teas",
                 pageId: "teas-center-page",
-                weakSelector: "#teas-weak"
+                prefixes: ["nshTEAS_"]
             }
-
         };
-
-
-        const WEAK_KEY_PATTERNS = [
-
-            {
-                courseId: "anatomy1",
-                regex: /^nshAP1_(.+)_missed$/i
-            },
-
-            {
-                courseId: "anatomy2",
-                regex: /^nshAP2_(.+)_missed$/i
-            },
-
-            {
-                courseId: "chemistry",
-                regex: /^nshCHEM_FINAL_(.+)_missed$/i
-            },
-
-            {
-                courseId: "microbiology",
-                regex: /^nshMICRO_FINAL_(.+)_missed$/i
-            },
-
-            {
-                courseId: "statistics",
-                regex: /^nshSTAT_(.+)_missed$/i
-            },
-
-            {
-                courseId: "nutrition",
-                regex: /^nshNUT_FINAL_(.+)_missed$/i
-            },
-
-            {
-                courseId: "labs",
-                regex: /^nshLAB_FINAL_(.+)_missed$/i
-            }
-
-        ];
-
 
         let rememberedCourseId = null;
         let activeWeakFilter = "all";
+
+        let historyReady = false;
+        let historyApplying = false;
+        let historySuppressed = false;
+        let historyCaptureTimer = null;
+
+        let lastHistorySignature = "";
+        let lastHistorySnapshot = null;
 
 
         // ====================================================================
@@ -167,7 +149,6 @@
                         )
                     );
 
-
                 return (
                     value === null ||
                     value === undefined
@@ -188,7 +169,6 @@
 
             const date =
                 new Date();
-
 
             return [
 
@@ -225,7 +205,6 @@
 
             }
 
-
             if (
                 element.classList.contains(
                     "hidden"
@@ -236,12 +215,10 @@
 
             }
 
-
             const style =
                 window.getComputedStyle(
                     element
                 );
-
 
             return (
                 style.display !==
@@ -281,7 +258,6 @@
                     "nsh-ux-toast-container"
                 );
 
-
             if (
                 !container
             ) {
@@ -291,10 +267,8 @@
                         "div"
                     );
 
-
                 container.id =
                     "nsh-ux-toast-container";
-
 
                 document.body.appendChild(
                     container
@@ -308,14 +282,11 @@
                     "div"
                 );
 
-
             toast.className =
                 "nsh-ux-toast";
 
-
             toast.textContent =
                 message;
-
 
             container.appendChild(
                 toast
@@ -339,7 +310,6 @@
                     toast.classList.remove(
                         "show"
                     );
-
 
                     setTimeout(
                         function () {
@@ -379,285 +349,329 @@
                     "style"
                 );
 
-
             style.id =
                 "nsh-ux-fixes-styles";
 
 
             style.textContent = `
 
-                /* ============================================================
-                   DASHBOARD-ONLY COMMAND CENTER
-                ============================================================ */
-
                 #study-command-center.nsh-ux-dashboard-hidden {
-                    display:none !important;
+                    display: none !important;
                 }
 
-
-                /* ============================================================
-                   MODAL BACK BUTTONS
-                ============================================================ */
 
                 .nsh-ux-modal-back {
-                    min-height:40px;
-                    padding:8px 12px;
-                    margin-right:10px;
-                    border:1px solid #d0d5dd;
-                    border-radius:11px;
-                    background:#fff;
-                    color:#344054;
-                    font-weight:800;
-                    cursor:pointer;
-                    white-space:nowrap;
+                    min-height: 40px;
+                    padding: 8px 12px;
+                    margin-right: 10px;
+                    border: 1px solid #d0d5dd;
+                    border-radius: 11px;
+                    background: #fff;
+                    color: #344054;
+                    font-weight: 800;
+                    cursor: pointer;
+                    white-space: nowrap;
                 }
 
+
                 .nsh-ux-modal-back:hover {
-                    border-color:#6366f1;
-                    color:#4338ca;
+                    border-color: #6366f1;
+                    color: #4338ca;
                 }
+
 
                 .study-modal-header.nsh-ux-header-with-back,
                 .study-tools-modal-header.nsh-ux-header-with-back {
-                    align-items:center;
+                    align-items: center;
                 }
+
 
                 .nsh-ux-modal-header-left {
-                    display:flex;
-                    align-items:center;
-                    gap:10px;
-                    min-width:0;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    min-width: 0;
                 }
 
-
-                /* ============================================================
-                   FOCUSED WEAK AREA CENTER
-                ============================================================ */
 
                 #nsh-ux-weak-overlay.hidden {
-                    display:none !important;
+                    display: none !important;
                 }
+
 
                 #nsh-ux-weak-overlay {
-                    position:fixed;
-                    inset:0;
-                    z-index:2147482000;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    padding:24px;
-                    background:rgba(15,23,42,.66);
-                    backdrop-filter:blur(7px);
-                    -webkit-backdrop-filter:blur(7px);
+                    position: fixed;
+                    inset: 0;
+                    z-index: 2147482000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 24px;
+                    background: rgba(15, 23, 42, .66);
+                    backdrop-filter: blur(7px);
+                    -webkit-backdrop-filter: blur(7px);
                 }
+
 
                 .nsh-ux-weak-modal {
-                    width:min(1080px,96vw);
-                    max-height:92vh;
-                    overflow:auto;
-                    background:#fff;
-                    color:#172033;
-                    border-radius:24px;
-                    box-shadow:0 30px 90px rgba(0,0,0,.3);
+                    width: min(1080px, 96vw);
+                    max-height: 92vh;
+                    overflow: auto;
+                    background: #fff;
+                    color: #172033;
+                    border-radius: 24px;
+                    box-shadow:
+                        0 30px 90px
+                        rgba(
+                            0,
+                            0,
+                            0,
+                            .3
+                        );
                 }
+
 
                 .nsh-ux-weak-header {
-                    position:sticky;
-                    top:0;
-                    z-index:10;
-                    display:flex;
-                    align-items:flex-start;
-                    justify-content:space-between;
-                    gap:18px;
-                    padding:22px 24px;
-                    background:rgba(255,255,255,.97);
-                    border-bottom:1px solid #e5e7eb;
-                    backdrop-filter:blur(8px);
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    gap: 18px;
+                    padding: 22px 24px;
+                    background:
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .97
+                        );
+                    border-bottom:
+                        1px solid
+                        #e5e7eb;
+                    backdrop-filter:
+                        blur(
+                            8px
+                        );
                 }
+
 
                 .nsh-ux-weak-header-main {
-                    display:flex;
-                    align-items:flex-start;
-                    gap:12px;
-                    min-width:0;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 12px;
+                    min-width: 0;
                 }
+
 
                 .nsh-ux-weak-header h2 {
-                    margin:3px 0 5px;
+                    margin: 3px 0 5px;
                 }
 
+
                 .nsh-ux-weak-header p {
-                    margin:0;
-                    color:#667085;
-                    line-height:1.55;
+                    margin: 0;
+                    color: #667085;
+                    line-height: 1.55;
                 }
+
 
                 .nsh-ux-close,
                 .nsh-ux-back,
                 .nsh-ux-filter,
                 .nsh-ux-action {
-                    border:1px solid #d0d5dd;
-                    background:#fff;
-                    color:#344054;
-                    border-radius:11px;
-                    min-height:42px;
-                    padding:9px 13px;
-                    font-weight:800;
-                    cursor:pointer;
+                    border:
+                        1px solid
+                        #d0d5dd;
+                    background: #fff;
+                    color: #344054;
+                    border-radius: 11px;
+                    min-height: 42px;
+                    padding: 9px 13px;
+                    font-weight: 800;
+                    cursor: pointer;
                 }
 
+
                 .nsh-ux-close {
-                    width:42px;
-                    padding:0;
-                    font-size:22px;
-                    flex:0 0 auto;
+                    width: 42px;
+                    padding: 0;
+                    font-size: 22px;
+                    flex: 0 0 auto;
                 }
+
 
                 .nsh-ux-back:hover,
                 .nsh-ux-filter:hover,
                 .nsh-ux-action:hover {
-                    border-color:#6366f1;
+                    border-color: #6366f1;
                 }
+
 
                 .nsh-ux-weak-body {
-                    padding:24px;
+                    padding: 24px;
                 }
 
+
                 .nsh-ux-weak-summary {
-                    display:grid;
+                    display: grid;
                     grid-template-columns:
                         repeat(
                             auto-fit,
-                            minmax(180px,1fr)
+                            minmax(
+                                180px,
+                                1fr
+                            )
                         );
-                    gap:12px;
-                    margin-bottom:20px;
+                    gap: 12px;
+                    margin-bottom: 20px;
                 }
+
 
                 .nsh-ux-summary-card {
-                    padding:17px;
-                    border:1px solid #e5e7eb;
-                    border-radius:16px;
-                    background:#f8fafc;
+                    padding: 17px;
+                    border:
+                        1px solid
+                        #e5e7eb;
+                    border-radius: 16px;
+                    background: #f8fafc;
                 }
+
 
                 .nsh-ux-summary-card strong {
-                    display:block;
-                    margin-bottom:4px;
-                    font-size:26px;
+                    display: block;
+                    margin-bottom: 4px;
+                    font-size: 26px;
                 }
+
 
                 .nsh-ux-summary-card span {
-                    color:#667085;
-                    font-size:11px;
-                    font-weight:900;
+                    color: #667085;
+                    font-size: 11px;
+                    font-weight: 900;
                 }
+
 
                 .nsh-ux-filter-row {
-                    display:flex;
-                    flex-wrap:wrap;
-                    gap:8px;
-                    margin-bottom:20px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-bottom: 20px;
                 }
+
 
                 .nsh-ux-filter.active {
-                    background:#4f46e5;
-                    border-color:#4f46e5;
-                    color:#fff;
+                    background: #4f46e5;
+                    border-color: #4f46e5;
+                    color: #fff;
                 }
+
 
                 .nsh-ux-weak-list {
-                    display:flex;
-                    flex-direction:column;
-                    gap:14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
                 }
+
 
                 .nsh-ux-weak-card {
-                    padding:18px;
-                    border:1px solid #e5e7eb;
-                    border-radius:18px;
-                    background:#fff;
+                    padding: 18px;
+                    border:
+                        1px solid
+                        #e5e7eb;
+                    border-radius: 18px;
+                    background: #fff;
                 }
 
+
                 .nsh-ux-weak-card-top {
-                    display:flex;
-                    align-items:flex-start;
-                    justify-content:space-between;
-                    gap:16px;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    gap: 16px;
                 }
+
 
                 .nsh-ux-course-pill,
                 .nsh-ux-count-pill {
-                    display:inline-flex;
-                    align-items:center;
-                    gap:5px;
-                    padding:5px 9px;
-                    border-radius:999px;
-                    font-size:10px;
-                    font-weight:900;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 5px 9px;
+                    border-radius: 999px;
+                    font-size: 10px;
+                    font-weight: 900;
                 }
+
 
                 .nsh-ux-course-pill {
-                    background:#eef2ff;
-                    color:#4338ca;
+                    background: #eef2ff;
+                    color: #4338ca;
                 }
+
 
                 .nsh-ux-count-pill {
-                    background:#fff1f2;
-                    color:#be123c;
-                    flex:0 0 auto;
+                    background: #fff1f2;
+                    color: #be123c;
+                    flex: 0 0 auto;
                 }
+
 
                 .nsh-ux-weak-card h3 {
-                    margin:8px 0 5px;
+                    margin: 8px 0 5px;
                 }
+
 
                 .nsh-ux-weak-card p {
-                    margin:0;
-                    color:#667085;
-                    line-height:1.55;
+                    margin: 0;
+                    color: #667085;
+                    line-height: 1.55;
                 }
+
 
                 .nsh-ux-weak-actions {
-                    display:flex;
-                    flex-wrap:wrap;
-                    gap:9px;
-                    margin-top:15px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 9px;
+                    margin-top: 15px;
                 }
+
 
                 .nsh-ux-action.primary {
-                    background:#4f46e5;
-                    border-color:#4f46e5;
-                    color:#fff;
+                    background: #4f46e5;
+                    border-color: #4f46e5;
+                    color: #fff;
                 }
+
 
                 .nsh-ux-action.focus {
-                    background:#fff7ed;
-                    border-color:#fdba74;
-                    color:#9a3412;
+                    background: #fff7ed;
+                    border-color: #fdba74;
+                    color: #9a3412;
                 }
+
 
                 .nsh-ux-empty {
-                    padding:42px 20px;
-                    text-align:center;
-                    border:1px dashed #cbd5e1;
-                    border-radius:18px;
-                    color:#667085;
+                    padding: 42px 20px;
+                    text-align: center;
+                    border:
+                        1px dashed
+                        #cbd5e1;
+                    border-radius: 18px;
+                    color: #667085;
                 }
+
 
                 .nsh-ux-empty-icon {
-                    margin-bottom:10px;
-                    font-size:44px;
+                    margin-bottom: 10px;
+                    font-size: 44px;
                 }
 
 
-                /* ============================================================
-                   TOAST
-                ============================================================ */
-
                 #nsh-ux-toast-container {
-                    position:fixed;
-                    z-index:2147483600;
+                    position: fixed;
+                    z-index: 2147483600;
                     top:
                         calc(
                             var(
@@ -666,7 +680,7 @@
                             ) +
                             14px
                         );
-                    right:18px;
+                    right: 18px;
                     width:
                         min(
                             380px,
@@ -675,15 +689,16 @@
                                 36px
                             )
                         );
-                    pointer-events:none;
+                    pointer-events: none;
                 }
 
+
                 .nsh-ux-toast {
-                    margin-bottom:8px;
-                    padding:13px 15px;
-                    border-radius:13px;
-                    background:#111827;
-                    color:#fff;
+                    margin-bottom: 8px;
+                    padding: 13px 15px;
+                    border-radius: 13px;
+                    background: #111827;
+                    color: #fff;
                     box-shadow:
                         0 12px 35px
                         rgba(
@@ -692,9 +707,9 @@
                             0,
                             .22
                         );
-                    font-size:12px;
-                    line-height:1.5;
-                    opacity:0;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    opacity: 0;
                     transform:
                         translateY(
                             -8px
@@ -704,18 +719,15 @@
                         transform .2s ease;
                 }
 
+
                 .nsh-ux-toast.show {
-                    opacity:1;
+                    opacity: 1;
                     transform:
                         translateY(
                             0
                         );
                 }
 
-
-                /* ============================================================
-                   DARK MODE
-                ============================================================ */
 
                 body.dark-mode
                 .nsh-ux-weak-modal,
@@ -737,10 +749,11 @@
 
                 body.dark-mode
                 .nsh-ux-modal-back {
-                    background:#111827;
-                    border-color:#334155;
-                    color:#e2e8f0;
+                    background: #111827;
+                    border-color: #334155;
+                    color: #e2e8f0;
                 }
+
 
                 body.dark-mode
                 .nsh-ux-weak-header {
@@ -751,44 +764,44 @@
                             39,
                             .97
                         );
-                    border-color:#334155;
+                    border-color: #334155;
                 }
+
 
                 body.dark-mode
                 .nsh-ux-weak-header p,
 
                 body.dark-mode
                 .nsh-ux-weak-card p {
-                    color:#cbd5e1;
+                    color: #cbd5e1;
                 }
+
 
                 body.dark-mode
                 .nsh-ux-summary-card {
-                    background:#172033;
-                    border-color:#334155;
-                    color:#f8fafc;
+                    background: #172033;
+                    border-color: #334155;
+                    color: #f8fafc;
                 }
+
 
                 body.dark-mode
                 .nsh-ux-summary-card span {
-                    color:#cbd5e1;
+                    color: #cbd5e1;
                 }
 
 
-                /* ============================================================
-                   MOBILE
-                ============================================================ */
-
-                @media (max-width:700px) {
+                @media (max-width: 700px) {
 
                     #nsh-ux-weak-overlay {
-                        padding:0;
-                        align-items:flex-end;
+                        padding: 0;
+                        align-items: flex-end;
                     }
 
+
                     .nsh-ux-weak-modal {
-                        width:100%;
-                        max-height:94vh;
+                        width: 100%;
+                        max-height: 94vh;
                         border-radius:
                             22px
                             22px
@@ -796,39 +809,47 @@
                             0;
                     }
 
+
                     .nsh-ux-weak-header,
                     .nsh-ux-weak-body {
-                        padding:18px;
+                        padding: 18px;
                     }
+
 
                     .nsh-ux-weak-header-main {
-                        display:block;
+                        display: block;
                     }
+
 
                     .nsh-ux-back {
-                        margin-bottom:10px;
+                        margin-bottom: 10px;
                     }
+
 
                     .nsh-ux-weak-card-top {
-                        display:block;
+                        display: block;
                     }
+
 
                     .nsh-ux-count-pill {
-                        margin-top:10px;
+                        margin-top: 10px;
                     }
+
 
                     .nsh-ux-weak-actions {
-                        display:grid;
-                        grid-template-columns:1fr;
+                        display: grid;
+                        grid-template-columns: 1fr;
                     }
+
 
                     .nsh-ux-weak-actions button {
-                        width:100%;
+                        width: 100%;
                     }
 
+
                     .nsh-ux-modal-back {
-                        padding:7px 9px;
-                        font-size:12px;
+                        padding: 7px 9px;
+                        font-size: 12px;
                     }
 
                 }
@@ -1093,23 +1114,11 @@
         }
 
 
-        function hideDashboardSections() {
+        function setDashboardVisible(
+            visible
+        ) {
 
-            [
-
-                ".dashboard-intro",
-
-                ".progress-overview",
-
-                "#study-command-center",
-
-                ".courses-section",
-
-                ".weak-areas-section",
-
-                "footer"
-
-            ].forEach(
+            DASHBOARD_SELECTORS.forEach(
                 function (
                     selector
                 ) {
@@ -1121,17 +1130,87 @@
 
 
                     if (
-                        element
+                        !element
                     ) {
 
-                        element.classList.add(
-                            "hidden"
-                        );
+                        return;
 
                     }
 
+
+                    element.classList.toggle(
+                        "hidden",
+                        !visible
+                    );
+
                 }
             );
+
+        }
+
+
+        function closeWeakOverlayDirect() {
+
+            const overlay =
+                document.getElementById(
+                    "nsh-ux-weak-overlay"
+                );
+
+
+            if (
+                !overlay
+            ) {
+
+                return false;
+
+            }
+
+
+            const wasVisible =
+                isVisible(
+                    overlay
+                );
+
+
+            overlay.classList.add(
+                "hidden"
+            );
+
+
+            document.body.style.overflow =
+                "";
+
+
+            return wasVisible;
+
+        }
+
+
+        function closeVisibleStudyOverlayDirect() {
+
+            const overlay =
+                getVisibleStudyOverlay();
+
+
+            if (
+                !overlay
+            ) {
+
+                return false;
+
+            }
+
+
+            overlay.classList.add(
+                "hidden"
+            );
+
+
+            document.body.style.overflow =
+                "";
+
+
+            return true;
 
         }
 
@@ -1161,42 +1240,8 @@
                 );
 
 
-            [
-
-                ".dashboard-intro",
-
-                ".progress-overview",
-
-                "#study-command-center",
-
-                ".courses-section",
-
-                ".weak-areas-section",
-
-                "footer"
-
-            ].forEach(
-                function (
-                    selector
-                ) {
-
-                    const element =
-                        document.querySelector(
-                            selector
-                        );
-
-
-                    if (
-                        element
-                    ) {
-
-                        element.classList.remove(
-                            "hidden"
-                        );
-
-                    }
-
-                }
+            setDashboardVisible(
+                true
             );
 
 
@@ -1238,7 +1283,9 @@
 
             closeVisibleStudyOverlayDirect();
 
-            hideDashboardSections();
+            setDashboardVisible(
+                false
+            );
 
 
             document
@@ -1394,14 +1441,14 @@
                     restorePlannerChoice();
 
                 },
-                90
+                100
             );
 
         }
 
 
         // ====================================================================
-        // FIX 4
+        // FIX 5
         // DAILY STUDY PLAN REMEMBERS SELECTED TIME
         // ====================================================================
 
@@ -1560,8 +1607,157 @@
 
 
         // ====================================================================
-        // WEAK AREA HELPERS
+        // WEAK-AREA STORAGE
         // ====================================================================
+
+        function parseArray(
+            value
+        ) {
+
+            try {
+
+                const parsed =
+                    JSON.parse(
+                        value ||
+                        "[]"
+                    );
+
+
+                return Array.isArray(
+                    parsed
+                )
+                    ? parsed
+                    : [];
+
+            } catch {
+
+                return [];
+
+            }
+
+        }
+
+
+        function weakKeyInfo(
+            key
+        ) {
+
+            const lower =
+                String(
+                    key ||
+                    ""
+                )
+                    .toLowerCase();
+
+
+            const suffixes = [
+
+                "_missed",
+
+                "_weak_questions",
+
+                "_weakquestions",
+
+                "_weak"
+
+            ];
+
+
+            const suffix =
+                suffixes.find(
+                    function (
+                        item
+                    ) {
+
+                        return lower.endsWith(
+                            item
+                        );
+
+                    }
+                );
+
+
+            if (
+                !suffix
+            ) {
+
+                return null;
+
+            }
+
+
+            for (
+                const [
+                    courseId,
+                    config
+                ]
+                of
+                Object.entries(
+                    COURSE_CONFIG
+                )
+            ) {
+
+                for (
+                    const prefix
+                    of
+                    config.prefixes
+                ) {
+
+                    if (
+                        !key.startsWith(
+                            prefix
+                        )
+                    ) {
+
+                        continue;
+
+                    }
+
+
+                    let topicId =
+                        key.slice(
+                            prefix.length,
+                            -suffix.length
+                        );
+
+
+                    topicId =
+                        topicId
+                            .replace(
+                                /^final_/i,
+                                ""
+                            )
+                            .replace(
+                                /^topic_/i,
+                                ""
+                            )
+                            .replace(
+                                /^_+|_+$/g,
+                                ""
+                            )
+                            .replaceAll(
+                                "_",
+                                "-"
+                            );
+
+
+                    return {
+
+                        courseId,
+
+                        topicId
+
+                    };
+
+                }
+
+            }
+
+
+            return null;
+
+        }
+
 
         function getTopicCard(
             courseId,
@@ -1599,14 +1795,30 @@
                             card
                         ) {
 
-                            return (
+                            const values =
                                 Object.values(
                                     card.dataset ||
                                     {}
-                                )
-                                    .includes(
+                                );
+
+
+                            return values.some(
+                                function (
+                                    value
+                                ) {
+
+                                    return (
+                                        String(
+                                            value
+                                        )
+                                            .replaceAll(
+                                                "_",
+                                                "-"
+                                            ) ===
                                         topicId
-                                    )
+                                    );
+
+                                }
                             );
 
                         }
@@ -1664,10 +1876,6 @@
 
             return topicId
                 .replaceAll(
-                    "_",
-                    "-"
-                )
-                .replaceAll(
                     "-",
                     " "
                 )
@@ -1686,43 +1894,16 @@
         }
 
 
-        function parseArray(
-            value
-        ) {
-
-            try {
-
-                const parsed =
-                    JSON.parse(
-                        value ||
-                        "[]"
-                    );
-
-
-                return Array.isArray(
-                    parsed
-                )
-                    ? parsed
-                    : [];
-
-            } catch {
-
-                return [];
-
-            }
-
-        }
-
-
         function collectWeakGroups() {
 
-            const groups =
-                [];
+            const map =
+                new Map();
 
 
             for (
                 let i = 0;
-                i < localStorage.length;
+                i <
+                localStorage.length;
                 i++
             ) {
 
@@ -1741,76 +1922,129 @@
                 }
 
 
-                for (
-                    const pattern
-                    of
-                    WEAK_KEY_PATTERNS
+                const info =
+                    weakKeyInfo(
+                        key
+                    );
+
+
+                if (
+                    !info
                 ) {
 
-                    const match =
-                        key.match(
-                            pattern.regex
-                        );
-
-
-                    if (
-                        !match
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    const items =
-                        parseArray(
-                            localStorage.getItem(
-                                key
-                            )
-                        );
-
-
-                    if (
-                        !items.length
-                    ) {
-
-                        break;
-
-                    }
-
-
-                    const topicId =
-                        match[1];
-
-
-                    groups.push({
-
-                        courseId:
-                            pattern.courseId,
-
-                        topicId,
-
-                        title:
-                            getTopicTitle(
-                                pattern.courseId,
-                                topicId
-                            ),
-
-                        count:
-                            items.length,
-
-                        ids:
-                            items,
-
-                        storageKey:
-                            key
-
-                    });
-
-
-                    break;
+                    continue;
 
                 }
+
+
+                const items =
+                    parseArray(
+                        localStorage.getItem(
+                            key
+                        )
+                    );
+
+
+                if (
+                    !items.length
+                ) {
+
+                    continue;
+
+                }
+
+
+                const identity =
+                    `${info.courseId}::${info.topicId || "mixed"}`;
+
+
+                if (
+                    !map.has(
+                        identity
+                    )
+                ) {
+
+                    map.set(
+                        identity,
+                        {
+
+                            courseId:
+                                info.courseId,
+
+                            topicId:
+                                info.topicId,
+
+                            ids:
+                                [],
+
+                            sourceKeys:
+                                []
+
+                        }
+                    );
+
+                }
+
+
+                const group =
+                    map.get(
+                        identity
+                    );
+
+
+                group
+                    .sourceKeys
+                    .push(
+                        key
+                    );
+
+
+                const existing =
+                    new Set(
+                        group.ids.map(
+                            String
+                        )
+                    );
+
+
+                items.forEach(
+                    function (
+                        item
+                    ) {
+
+                        const value =
+                            typeof item ===
+                            "object"
+                                ? String(
+                                    item?.id ??
+                                    item?.questionId ??
+                                    JSON.stringify(
+                                        item
+                                    )
+                                )
+                                : String(
+                                    item
+                                );
+
+
+                        if (
+                            !existing.has(
+                                value
+                            )
+                        ) {
+
+                            existing.add(
+                                value
+                            );
+
+                            group.ids.push(
+                                item
+                            );
+
+                        }
+
+                    }
+                );
 
             }
 
@@ -1822,7 +2056,26 @@
                 );
 
 
+            const alreadyHasTeas =
+                Array.from(
+                    map.values()
+                )
+                    .some(
+                        function (
+                            group
+                        ) {
+
+                            return (
+                                group.courseId ===
+                                "teas"
+                            );
+
+                        }
+                    );
+
+
             if (
+                !alreadyHasTeas &&
                 teasStats &&
                 Array.isArray(
                     teasStats.weak
@@ -1830,32 +2083,54 @@
                 teasStats.weak.length
             ) {
 
-                groups.push({
+                map.set(
+                    "teas::mixed",
+                    {
 
-                    courseId:
-                        "teas",
+                        courseId:
+                            "teas",
 
-                    topicId:
-                        "",
+                        topicId:
+                            "",
 
-                    title:
-                        "Saved TEAS Weak Questions",
+                        ids:
+                            teasStats.weak,
 
-                    count:
-                        teasStats.weak.length,
+                        sourceKeys: [
+                            "nshTEAS_FINAL_STATS"
+                        ]
 
-                    ids:
-                        teasStats.weak,
-
-                    storageKey:
-                        "nshTEAS_FINAL_STATS"
-
-                });
+                    }
+                );
 
             }
 
 
-            return groups
+            return Array.from(
+                map.values()
+            )
+                .map(
+                    function (
+                        group
+                    ) {
+
+                        return {
+
+                            ...group,
+
+                            count:
+                                group.ids.length,
+
+                            title:
+                                getTopicTitle(
+                                    group.courseId,
+                                    group.topicId
+                                )
+
+                        };
+
+                    }
+                )
                 .sort(
                     function (
                         a,
@@ -1892,6 +2167,143 @@
 
                     }
                 );
+
+        }
+
+
+        function findNativeWeakButton(
+            courseId
+        ) {
+
+            const page =
+                findCoursePage(
+                    courseId
+                );
+
+
+            if (
+                !page
+            ) {
+
+                return null;
+
+            }
+
+
+            const preferred = {
+
+                anatomy1: [
+                    "#anatomy1-weak-button",
+                    "#ap1-weak-button"
+                ],
+
+                anatomy2: [
+                    "#ap2-weak-button",
+                    "#anatomy2-weak-button"
+                ],
+
+                chemistry: [
+                    "#chem-weak-button"
+                ],
+
+                microbiology: [
+                    "#micro-weak-button",
+                    "#microbiology-weak-button"
+                ],
+
+                statistics: [
+                    "#stat-weak-button",
+                    "#statistics-weak-button"
+                ],
+
+                nutrition: [
+                    "#nut-weak-button",
+                    "#nutrition-weak-button"
+                ],
+
+                labs: [
+                    "#lab-weak-button",
+                    "#labs-weak-button"
+                ],
+
+                teas: [
+                    "#teas-weak",
+                    "#teas-weak-button",
+                    "#teas-weakness-button"
+                ]
+
+            };
+
+
+            for (
+                const selector
+                of
+                preferred[
+                    courseId
+                ] ||
+                []
+            ) {
+
+                const button =
+
+                    page.querySelector(
+                        selector
+                    ) ||
+
+                    document.querySelector(
+                        selector
+                    );
+
+
+                if (
+                    button
+                ) {
+
+                    return button;
+
+                }
+
+            }
+
+
+            return (
+                Array.from(
+                    page.querySelectorAll(
+                        "button"
+                    )
+                )
+                    .find(
+                        function (
+                            button
+                        ) {
+
+                            const text =
+                                button
+                                    .textContent
+                                    .trim()
+                                    .toLowerCase();
+
+
+                            return (
+
+                                text.includes(
+                                    "weak area"
+                                ) ||
+
+                                text.includes(
+                                    "weak question"
+                                ) ||
+
+                                text.includes(
+                                    "weakness"
+                                )
+
+                            );
+
+                        }
+                    ) ||
+                null
+            );
 
         }
 
@@ -2020,7 +2432,11 @@
                 )
                 .addEventListener(
                     "click",
-                    closeWeakOverlayDirect
+                    function () {
+
+                        navigateBack();
+
+                    }
                 );
 
 
@@ -2030,7 +2446,11 @@
                 )
                 .addEventListener(
                     "click",
-                    closeWeakOverlayDirect
+                    function () {
+
+                        navigateBack();
+
+                    }
                 );
 
 
@@ -2045,7 +2465,7 @@
                         overlay
                     ) {
 
-                        closeWeakOverlayDirect();
+                        navigateBack();
 
                     }
 
@@ -2058,14 +2478,18 @@
         }
 
 
-        function openWeakOverlay() {
+        function openWeakOverlay(
+            options = {}
+        ) {
 
             const overlay =
                 ensureWeakOverlay();
 
 
             activeWeakFilter =
-                "all";
+                options.keepFilter
+                    ? activeWeakFilter
+                    : "all";
 
 
             renderWeakOverlay();
@@ -2082,33 +2506,148 @@
 
             ensureModalBackButtons();
 
-        }
-
-
-        function closeWeakOverlayDirect() {
-
-            const overlay =
-                document.getElementById(
-                    "nsh-ux-weak-overlay"
-                );
-
 
             if (
-                !overlay
+                !options.skipHistory
             ) {
 
-                return;
+                pushCurrentViewSoon();
 
             }
 
-
-            overlay.classList.add(
-                "hidden"
-            );
+        }
 
 
-            document.body.style.overflow =
-                "";
+        function renderWeakCard(
+            group
+        ) {
+
+            const course =
+                COURSE_CONFIG[
+                    group.courseId
+                ];
+
+
+            const hasExactTopic =
+                Boolean(
+                    group.topicId
+                );
+
+
+            const canPractice =
+                Boolean(
+                    findNativeWeakButton(
+                        group.courseId
+                    )
+                );
+
+
+            return `
+
+                <article class="nsh-ux-weak-card">
+
+                    <div class="nsh-ux-weak-card-top">
+
+                        <div>
+
+                            <span class="nsh-ux-course-pill">
+
+                                ${course.icon}
+
+                                ${escapeHTML(
+                                    course.name
+                                )}
+
+                            </span>
+
+
+                            <h3>
+
+                                ${escapeHTML(
+                                    group.title
+                                )}
+
+                            </h3>
+
+
+                            <p>
+
+                                ${group.count}
+
+                                ${
+                                    group.count ===
+                                    1
+                                        ? "missed question"
+                                        : "missed questions"
+                                }
+
+                                saved from
+
+                                ${
+                                    hasExactTopic
+                                        ? "this exact topic."
+                                        : "this course."
+                                }
+
+                            </p>
+
+                        </div>
+
+
+                        <span class="nsh-ux-count-pill">
+
+                            ${group.count}
+
+                            to review
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="nsh-ux-weak-actions">
+
+                        ${
+                            hasExactTopic
+                                ? `
+
+                                    <button
+                                        type="button"
+                                        class="nsh-ux-action primary"
+                                        data-ux-course="${group.courseId}"
+                                        data-ux-open-topic="${escapeHTML(
+                                            group.topicId
+                                        )}"
+                                    >
+                                        Open Exact Topic →
+                                    </button>
+
+                                `
+                                : ""
+                        }
+
+
+                        ${
+                            canPractice
+                                ? `
+
+                                    <button
+                                        type="button"
+                                        class="nsh-ux-action focus"
+                                        data-ux-practice-course="${group.courseId}"
+                                    >
+                                        🎯 Practice Only Weak Questions
+                                    </button>
+
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                </article>
+
+            `;
 
         }
 
@@ -2169,7 +2708,7 @@
                 );
 
 
-            const coursesWithWeak =
+            const courseCount =
                 new Set(
                     groups.map(
                         function (
@@ -2184,7 +2723,7 @@
                     .size;
 
 
-            const filterButtons = [
+            const filters = [
 
                 `
 
@@ -2309,7 +2848,7 @@
                     <div class="nsh-ux-summary-card">
 
                         <strong>
-                            ${coursesWithWeak}
+                            ${courseCount}
                         </strong>
 
                         <span>
@@ -2340,7 +2879,7 @@
 
                             <div class="nsh-ux-filter-row">
 
-                                ${filterButtons}
+                                ${filters}
 
                             </div>
 
@@ -2469,138 +3008,6 @@
         }
 
 
-        function renderWeakCard(
-            group
-        ) {
-
-            const course =
-                COURSE_CONFIG[
-                    group.courseId
-                ];
-
-
-            const canPractice =
-                Boolean(
-                    course.weakSelector
-                );
-
-
-            const hasExactTopic =
-                Boolean(
-                    group.topicId
-                );
-
-
-            return `
-
-                <article class="nsh-ux-weak-card">
-
-                    <div class="nsh-ux-weak-card-top">
-
-                        <div>
-
-                            <span class="nsh-ux-course-pill">
-
-                                ${course.icon}
-
-                                ${escapeHTML(
-                                    course.name
-                                )}
-
-                            </span>
-
-
-                            <h3>
-
-                                ${escapeHTML(
-                                    group.title
-                                )}
-
-                            </h3>
-
-
-                            <p>
-
-                                ${group.count}
-
-                                ${
-                                    group.count ===
-                                    1
-                                        ? "missed question"
-                                        : "missed questions"
-                                }
-
-                                saved from
-
-                                ${
-                                    hasExactTopic
-                                        ? "this exact topic."
-                                        : "this course."
-                                }
-
-                            </p>
-
-                        </div>
-
-
-                        <span class="nsh-ux-count-pill">
-
-                            ${group.count}
-
-                            to review
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="nsh-ux-weak-actions">
-
-                        ${
-                            hasExactTopic
-                                ? `
-
-                                    <button
-                                        type="button"
-                                        class="nsh-ux-action primary"
-                                        data-ux-course="${group.courseId}"
-                                        data-ux-open-topic="${escapeHTML(
-                                            group.topicId
-                                        )}"
-                                    >
-                                        Open Exact Topic →
-                                    </button>
-
-                                `
-                                : ""
-                        }
-
-
-                        ${
-                            canPractice
-                                ? `
-
-                                    <button
-                                        type="button"
-                                        class="nsh-ux-action focus"
-                                        data-ux-practice-course="${group.courseId}"
-                                    >
-                                        🎯 Practice Only Weak Questions
-                                    </button>
-
-                                `
-                                : ""
-                        }
-
-                    </div>
-
-                </article>
-
-            `;
-
-        }
-
-
         function openCourseViaCard(
             courseId
         ) {
@@ -2626,6 +3033,10 @@
                 );
 
 
+            rememberedCourseId =
+                courseId;
+
+
             if (
                 !card
             ) {
@@ -2637,12 +3048,7 @@
             }
 
 
-            rememberedCourseId =
-                courseId;
-
-
             card.click();
-
 
             scheduleViewSync();
 
@@ -2657,6 +3063,10 @@
             topicId
         ) {
 
+            historySuppressed =
+                true;
+
+
             closeWeakOverlayDirect();
 
 
@@ -2665,6 +3075,9 @@
                     courseId
                 )
             ) {
+
+                historySuppressed =
+                    false;
 
                 return;
 
@@ -2685,9 +3098,19 @@
                         !card
                     ) {
 
+                        historySuppressed =
+                            false;
+
+
                         showToast(
                             "The course opened, but that exact topic could not be matched automatically."
                         );
+
+
+                        pushCurrentViewSoon(
+                            true
+                        );
+
 
                         return;
 
@@ -2700,8 +3123,23 @@
 
                     card.click();
 
-
                     scheduleViewSync();
+
+
+                    setTimeout(
+                        function () {
+
+                            historySuppressed =
+                                false;
+
+
+                            pushCurrentViewSoon(
+                                true
+                            );
+
+                        },
+                        120
+                    );
 
                 },
                 120
@@ -2714,24 +3152,8 @@
             courseId
         ) {
 
-            const config =
-                COURSE_CONFIG[
-                    courseId
-                ];
-
-
-            if (
-                !config ||
-                !config.weakSelector
-            ) {
-
-                showToast(
-                    "Use Open Exact Topic for this course's saved weakness."
-                );
-
-                return;
-
-            }
+            historySuppressed =
+                true;
 
 
             closeWeakOverlayDirect();
@@ -2743,6 +3165,9 @@
                 )
             ) {
 
+                historySuppressed =
+                    false;
+
                 return;
 
             }
@@ -2752,8 +3177,8 @@
                 function () {
 
                     const button =
-                        document.querySelector(
-                            config.weakSelector
+                        findNativeWeakButton(
+                            courseId
                         );
 
 
@@ -2761,9 +3186,19 @@
                         !button
                     ) {
 
+                        historySuppressed =
+                            false;
+
+
                         showToast(
-                            "The weak-question practice button could not be found."
+                            "Use Open Exact Topic for this course's saved weakness."
                         );
+
+
+                        pushCurrentViewSoon(
+                            true
+                        );
+
 
                         return;
 
@@ -2772,8 +3207,23 @@
 
                     button.click();
 
-
                     scheduleViewSync();
+
+
+                    setTimeout(
+                        function () {
+
+                            historySuppressed =
+                                false;
+
+
+                            pushCurrentViewSoon(
+                                true
+                            );
+
+                        },
+                        120
+                    );
 
                 },
                 140
@@ -2783,18 +3233,163 @@
 
 
         // ====================================================================
-        // FIX 3
-        // STEP-BY-STEP BACK NAVIGATION
+        // FIX 3 + 4
+        // STEP-BY-STEP HISTORY + iPHONE SWIPE BACK
         // ====================================================================
 
-        function closeVisibleStudyOverlayDirect() {
+        function getViewSnapshot() {
 
-            const overlay =
+            const weakOverlay =
+                document.getElementById(
+                    "nsh-ux-weak-overlay"
+                );
+
+
+            const studyOverlay =
                 getVisibleStudyOverlay();
 
 
+            const lesson =
+                getVisibleLessonPage();
+
+
+            const course =
+                getVisibleCoursePage();
+
+
+            let baseType =
+                "dashboard";
+
+
+            let baseId =
+                "dashboard";
+
+
+            let courseId =
+                rememberedCourseId;
+
+
             if (
-                !overlay
+                lesson
+            ) {
+
+                baseType =
+                    "lesson";
+
+
+                baseId =
+                    lesson.id ||
+                    "";
+
+
+                courseId =
+                    courseId ||
+                    inferCourseIdFromElement(
+                        lesson
+                    );
+
+            } else if (
+                course
+            ) {
+
+                baseType =
+                    "course";
+
+
+                baseId =
+                    course.id ||
+                    "";
+
+
+                courseId =
+                    inferCourseIdFromElement(
+                        course
+                    ) ||
+                    courseId;
+
+            }
+
+
+            let overlayId =
+                "";
+
+
+            if (
+                weakOverlay &&
+                isVisible(
+                    weakOverlay
+                )
+            ) {
+
+                overlayId =
+                    "nsh-ux-weak-overlay";
+
+            } else if (
+                studyOverlay
+            ) {
+
+                overlayId =
+                    studyOverlay.id ||
+                    "study-overlay";
+
+            }
+
+
+            return {
+
+                baseType,
+
+                baseId,
+
+                courseId:
+                    courseId ||
+                    "",
+
+                overlayId
+
+            };
+
+        }
+
+
+        function snapshotSignature(
+            snapshot
+        ) {
+
+            return [
+
+                snapshot.baseType,
+
+                snapshot.baseId,
+
+                snapshot.courseId,
+
+                snapshot.overlayId
+
+            ].join("|");
+
+        }
+
+
+        function currentHistoryDepth() {
+
+            return Number(
+                history.state
+                    ?.nshUxDepth ||
+                0
+            );
+
+        }
+
+
+        function isBackwardTransition(
+            previous,
+            next
+        ) {
+
+            if (
+                !previous ||
+                !next
             ) {
 
                 return false;
@@ -2802,50 +3397,432 @@
             }
 
 
-            const nativeClose =
-
-                overlay.querySelector(
-                    ".study-modal-close"
-                ) ||
-
-                overlay.querySelector(
-                    ".study-tools-close"
-                ) ||
-
-                overlay.querySelector(
-                    "#tools-modal-close"
-                ) ||
-
-                overlay.querySelector(
-                    '[id$="modal-close"]'
-                );
-
-
             if (
-                nativeClose
+                previous.overlayId &&
+                !next.overlayId &&
+                previous.baseType ===
+                next.baseType &&
+                previous.baseId ===
+                next.baseId
             ) {
 
-                nativeClose.click();
-
-            } else {
-
-                overlay.classList.add(
-                    "hidden"
-                );
-
-
-                document.body.style.overflow =
-                    "";
+                return true;
 
             }
 
 
-            return true;
+            if (
+                previous.baseType ===
+                "lesson" &&
+                next.baseType ===
+                "course" &&
+                previous.courseId &&
+                previous.courseId ===
+                next.courseId
+            ) {
+
+                return true;
+
+            }
+
+
+            if (
+                previous.baseType ===
+                "course" &&
+                next.baseType ===
+                "dashboard"
+            ) {
+
+                return true;
+
+            }
+
+
+            return false;
 
         }
 
 
-        function goBackOneStep() {
+        function initializeHistory() {
+
+            const snapshot =
+                getViewSnapshot();
+
+
+            const existing =
+                history.state ||
+                {};
+
+
+            const existingDepth =
+                Number(
+                    existing
+                        .nshUxDepth ||
+                    0
+                );
+
+
+            history.replaceState(
+
+                {
+
+                    ...existing,
+
+                    nshUx:
+                        true,
+
+                    nshUxDepth:
+                        existingDepth,
+
+                    nshUxSnapshot:
+                        snapshot
+
+                },
+
+                "",
+
+                window.location.href
+
+            );
+
+
+            lastHistorySnapshot =
+                snapshot;
+
+
+            lastHistorySignature =
+                snapshotSignature(
+                    snapshot
+                );
+
+
+            historyReady =
+                true;
+
+        }
+
+
+        function pushCurrentView(
+            force = false
+        ) {
+
+            if (
+                !historyReady ||
+                historyApplying
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                historySuppressed &&
+                !force
+            ) {
+
+                return;
+
+            }
+
+
+            const snapshot =
+                getViewSnapshot();
+
+
+            const signature =
+                snapshotSignature(
+                    snapshot
+                );
+
+
+            if (
+                !force &&
+                signature ===
+                lastHistorySignature
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !force &&
+                currentHistoryDepth() >
+                0 &&
+                isBackwardTransition(
+                    lastHistorySnapshot,
+                    snapshot
+                )
+            ) {
+
+                window.history.back();
+
+                return;
+
+            }
+
+
+            const nextDepth =
+                currentHistoryDepth() +
+                1;
+
+
+            const existing =
+                history.state ||
+                {};
+
+
+            history.pushState(
+
+                {
+
+                    ...existing,
+
+                    nshUx:
+                        true,
+
+                    nshUxDepth:
+                        nextDepth,
+
+                    nshUxSnapshot:
+                        snapshot
+
+                },
+
+                "",
+
+                window.location.href
+
+            );
+
+
+            lastHistorySnapshot =
+                snapshot;
+
+
+            lastHistorySignature =
+                signature;
+
+        }
+
+
+        function pushCurrentViewSoon(
+            force = false
+        ) {
+
+            clearTimeout(
+                historyCaptureTimer
+            );
+
+
+            historyCaptureTimer =
+                setTimeout(
+                    function () {
+
+                        pushCurrentView(
+                            force
+                        );
+
+                    },
+                    150
+                );
+
+        }
+
+
+        function restoreSnapshot(
+            snapshot
+        ) {
+
+            if (
+                !snapshot
+            ) {
+
+                return;
+
+            }
+
+
+            historyApplying =
+                true;
+
+
+            closeWeakOverlayDirect();
+
+            closeVisibleStudyOverlayDirect();
+
+
+            document
+                .querySelectorAll(
+                    ".course-page," +
+                    ".lesson-page"
+                )
+                .forEach(
+                    function (
+                        page
+                    ) {
+
+                        page.classList.add(
+                            "hidden"
+                        );
+
+                    }
+                );
+
+
+            if (
+                snapshot.baseType ===
+                "dashboard"
+            ) {
+
+                setDashboardVisible(
+                    true
+                );
+
+            } else {
+
+                setDashboardVisible(
+                    false
+                );
+
+
+                const page =
+                    snapshot.baseId
+                        ? document.getElementById(
+                            snapshot.baseId
+                        )
+                        : null;
+
+
+                if (
+                    page
+                ) {
+
+                    page.classList.remove(
+                        "hidden"
+                    );
+
+                } else if (
+                    snapshot.baseType ===
+                    "course" &&
+                    snapshot.courseId
+                ) {
+
+                    const coursePage =
+                        findCoursePage(
+                            snapshot.courseId
+                        );
+
+
+                    if (
+                        coursePage
+                    ) {
+
+                        coursePage.classList.remove(
+                            "hidden"
+                        );
+
+                    } else {
+
+                        setDashboardVisible(
+                            true
+                        );
+
+                    }
+
+                } else {
+
+                    setDashboardVisible(
+                        true
+                    );
+
+                }
+
+            }
+
+
+            rememberedCourseId =
+                snapshot.courseId ||
+                null;
+
+
+            if (
+                snapshot.overlayId ===
+                "nsh-ux-weak-overlay"
+            ) {
+
+                openWeakOverlay({
+
+                    skipHistory:
+                        true,
+
+                    keepFilter:
+                        true
+
+                });
+
+            } else if (
+                snapshot.overlayId
+            ) {
+
+                const overlay =
+                    document.getElementById(
+                        snapshot.overlayId
+                    );
+
+
+                if (
+                    overlay
+                ) {
+
+                    overlay.classList.remove(
+                        "hidden"
+                    );
+
+
+                    document.body.style.overflow =
+                        "hidden";
+
+                }
+
+            }
+
+
+            syncCommandCenterVisibility();
+
+            ensureModalBackButtons();
+
+            restorePlannerChoice();
+
+            scrollToTop();
+
+
+            lastHistorySnapshot =
+                getViewSnapshot();
+
+
+            lastHistorySignature =
+                snapshotSignature(
+                    lastHistorySnapshot
+                );
+
+
+            setTimeout(
+                function () {
+
+                    historyApplying =
+                        false;
+
+                },
+                50
+            );
+
+        }
+
+
+        function directBackOneStep() {
 
             const weakOverlay =
                 document.getElementById(
@@ -2914,12 +3891,8 @@
             }
 
 
-            const course =
-                getVisibleCoursePage();
-
-
             if (
-                course
+                getVisibleCoursePage()
             ) {
 
                 showDashboardDirect();
@@ -2928,6 +3901,57 @@
 
         }
 
+
+        function navigateBack() {
+
+            if (
+                historyReady &&
+                currentHistoryDepth() >
+                0
+            ) {
+
+                window.history.back();
+
+                return;
+
+            }
+
+
+            directBackOneStep();
+
+        }
+
+
+        window.addEventListener(
+            "popstate",
+            function (
+                event
+            ) {
+
+                if (
+                    !event.state
+                        ?.nshUx ||
+                    !event.state
+                        ?.nshUxSnapshot
+                ) {
+
+                    return;
+
+                }
+
+
+                restoreSnapshot(
+                    event.state
+                        .nshUxSnapshot
+                );
+
+            }
+        );
+
+
+        // ====================================================================
+        // BACK BUTTON INSIDE QUIZ / TOOL MODALS
+        // ====================================================================
 
         function ensureModalBackButtons() {
 
@@ -2986,7 +4010,7 @@
 
                                 event.stopPropagation();
 
-                                goBackOneStep();
+                                navigateBack();
 
                             }
                         );
@@ -3000,38 +4024,30 @@
                             first
                         ) {
 
-                            if (
-                                !first.classList.contains(
-                                    "nsh-ux-modal-header-left"
-                                )
-                            ) {
-
-                                const wrapper =
-                                    document.createElement(
-                                        "div"
-                                    );
-
-
-                                wrapper.className =
-                                    "nsh-ux-modal-header-left";
-
-
-                                header.insertBefore(
-                                    wrapper,
-                                    first
+                            const wrapper =
+                                document.createElement(
+                                    "div"
                                 );
 
 
-                                wrapper.appendChild(
-                                    button
-                                );
+                            wrapper.className =
+                                "nsh-ux-modal-header-left";
 
 
-                                wrapper.appendChild(
-                                    first
-                                );
+                            header.insertBefore(
+                                wrapper,
+                                first
+                            );
 
-                            }
+
+                            wrapper.appendChild(
+                                button
+                            );
+
+
+                            wrapper.appendChild(
+                                first
+                            );
 
                         } else {
 
@@ -3053,7 +4069,7 @@
 
 
         // ====================================================================
-        // GLOBAL EVENT HANDLING
+        // GLOBAL USER ACTIONS
         // ====================================================================
 
         document.addEventListener(
@@ -3106,9 +4122,9 @@
                 }
 
 
-                // ============================================================
-                // SAVE PLANNER SELECTION BEFORE STUDYTOOLS RERENDERS
-                // ============================================================
+                // ------------------------------------------------------------
+                // SAVE DAILY STUDY TIME
+                // ------------------------------------------------------------
 
                 const generatePlan =
                     target.closest(
@@ -3139,9 +4155,9 @@
                 }
 
 
-                // ============================================================
-                // INTERCEPT OLD WEAK AREA CENTER
-                // ============================================================
+                // ------------------------------------------------------------
+                // FOCUSED WEAK AREAS
+                // ------------------------------------------------------------
 
                 const dashboardWeak =
                     target.closest(
@@ -3175,10 +4191,9 @@
                 }
 
 
-                // ============================================================
-                // PAGE BACK BUTTONS
-                // ALWAYS GO BACK EXACTLY ONE LEVEL
-                // ============================================================
+                // ------------------------------------------------------------
+                // WEBSITE BACK BUTTON
+                // ------------------------------------------------------------
 
                 const backButton =
                     target.closest(
@@ -3187,46 +4202,50 @@
 
 
                 if (
-                    backButton
+                    backButton &&
+                    backButton.closest(
+                        ".course-page," +
+                        ".lesson-page"
+                    )
                 ) {
 
-                    const ownerLesson =
-                        backButton.closest(
-                            ".lesson-page"
-                        );
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                    event.stopImmediatePropagation();
 
 
-                    const ownerCourse =
-                        backButton.closest(
-                            ".course-page"
-                        );
+                    navigateBack();
 
 
-                    if (
-                        ownerLesson ||
-                        ownerCourse
-                    ) {
-
-                        event.preventDefault();
-
-                        event.stopPropagation();
-
-                        event.stopImmediatePropagation();
-
-
-                        goBackOneStep();
-
-
-                        return;
-
-                    }
+                    return;
 
                 }
 
 
-                // ============================================================
-                // REMEMBER COURSE BEFORE OPENING A TOPIC
-                // ============================================================
+                // ------------------------------------------------------------
+                // MODAL BACK BUTTON
+                // ------------------------------------------------------------
+
+                const modalBack =
+                    target.closest(
+                        ".nsh-ux-modal-back"
+                    );
+
+
+                if (
+                    modalBack
+                ) {
+
+                    return;
+
+                }
+
+
+                // ------------------------------------------------------------
+                // REMEMBER CURRENT COURSE
+                // ------------------------------------------------------------
 
                 const visibleCourse =
                     getVisibleCoursePage();
@@ -3273,7 +4292,14 @@
                 }
 
 
+                // ------------------------------------------------------------
+                // AFTER NORMAL USER NAVIGATION:
+                // save the new view into browser history
+                // ------------------------------------------------------------
+
                 scheduleViewSync();
+
+                pushCurrentViewSoon();
 
             },
 
@@ -3305,15 +4331,18 @@
 
 
                 if (
-                    weakOverlay &&
-                    isVisible(
-                        weakOverlay
-                    )
+                    (
+                        weakOverlay &&
+                        isVisible(
+                            weakOverlay
+                        )
+                    ) ||
+                    getVisibleStudyOverlay()
                 ) {
 
                     event.preventDefault();
 
-                    closeWeakOverlayDirect();
+                    navigateBack();
 
                 }
 
@@ -3355,13 +4384,15 @@
 
                 syncCommandCenterVisibility();
 
+                initializeHistory();
+
             },
-            250
+            300
         );
 
 
         console.log(
-            "✅ Nursing Prep Lab UX fixes loaded: dashboard tools, weak review, back navigation and planner memory."
+            "✅ Nursing Prep Lab UX fixes loaded: dashboard-only tools, focused weak review, step-by-step back, iPhone swipe-back and planner memory."
         );
 
     });

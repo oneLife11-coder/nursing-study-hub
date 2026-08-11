@@ -1,0 +1,3498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Nursing Study Hub - Interactive nursing prerequisite and TEAS study platform."
+    >
+
+    <meta
+        name="theme-color"
+        content="#4f46e5"
+    >
+
+    <title>
+        Nursing Study Hub
+    </title>
+
+    <link
+        rel="icon"
+        type="image/svg+xml"
+        href='data:image/svg+xml,
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <text y=".9em" font-size="90">🩺</text>
+        </svg>'
+    >
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         WELCOME SCREEN
+    ====================================================== -->
+
+    <section id="welcome-screen">
+
+        <div class="welcome-container">
+
+            <div class="welcome-logo">
+                🩺
+            </div>
+
+            <p class="section-label">
+                NURSING STUDY HUB
+            </p>
+
+            <h1>
+                Master Your Nursing Prerequisites
+            </h1>
+
+            <p class="welcome-description">
+                Learn, review and master the science courses
+                you need for nursing school and the TEAS exam.
+            </p>
+
+            <div class="username-box">
+
+                <label for="username">
+                    What should we call you?
+                </label>
+
+                <input
+                    id="username"
+                    type="text"
+                    maxlength="30"
+                    placeholder="Enter your name"
+                    autocomplete="off"
+                >
+
+                <button id="start-button">
+                    Start Studying →
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN APPLICATION
+    ====================================================== -->
+
+    <main
+        id="app"
+        class="hidden"
+    >
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <header class="top-header">
+
+            <div class="brand">
+
+                <div class="brand-icon">
+                    🩺
+                </div>
+
+                <div>
+
+                    <strong>
+                        Nursing Study Hub
+                    </strong>
+
+                    <span>
+                        Learn • Practice • Master
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="user-area">
+
+                <span id="welcome-name">
+                    Welcome
+                </span>
+
+                <button
+                    id="theme-button"
+                    aria-label="Toggle dark mode"
+                >
+                    🌙
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             DASHBOARD INTRO
+        ================================================== -->
+
+        <section class="dashboard-intro">
+
+            <div>
+
+                <p class="section-label">
+                    YOUR STUDY DASHBOARD
+                </p>
+
+                <h1 id="dashboard-greeting">
+                    Ready to study?
+                </h1>
+
+                <p>
+                    Choose a course, continue your progress
+                    and build mastery one topic at a time.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PROGRESS OVERVIEW
+        ================================================== -->
+
+        <section class="progress-overview">
+
+            <article class="progress-card">
+
+                <div class="progress-card-icon">
+                    📈
+                </div>
+
+                <div>
+
+                    <span>
+                        Overall Progress
+                    </span>
+
+                    <strong>
+                        <span id="overall-progress">
+                            0
+                        </span>%
+                    </strong>
+
+                </div>
+
+                <div class="mini-progress">
+
+                    <div
+                        id="overall-progress-bar"
+                        class="mini-progress-fill"
+                    >
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <article class="progress-card">
+
+                <div class="progress-card-icon">
+                    🎯
+                </div>
+
+                <div>
+
+                    <span>
+                        Topics Mastered
+                    </span>
+
+                    <strong id="topics-mastered">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+            <article class="progress-card">
+
+                <div class="progress-card-icon">
+                    🧠
+                </div>
+
+                <div>
+
+                    <span>
+                        Questions Answered
+                    </span>
+
+                    <strong id="questions-answered">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+            <article class="progress-card">
+
+                <div class="progress-card-icon">
+                    🔥
+                </div>
+
+                <div>
+
+                    <span>
+                        Study Streak
+                    </span>
+
+                    <strong>
+
+                        <span id="study-streak">
+                            1
+                        </span>
+
+                        day
+
+                    </strong>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             COURSES
+        ================================================== -->
+
+        <section class="courses-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="section-label">
+                        COURSES
+                    </p>
+
+                    <h2>
+                        Your Learning Library
+                    </h2>
+
+                </div>
+
+                <p>
+                    Full lessons, active recall,
+                    quizzes and mastery tracking.
+                </p>
+
+            </div>
+
+
+            <div class="course-grid">
+
+                <!-- A&P I -->
+
+                <article
+                    class="course-card anatomy-card"
+                    data-course="anatomy1"
+                >
+
+                    <div class="course-icon">
+                        🫀
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            SCIENCE
+                        </span>
+
+                        <h3>
+                            Anatomy & Physiology I
+                        </h3>
+
+                        <p>
+                            Foundations, cells, tissues,
+                            integumentary, skeletal,
+                            muscular and nervous systems.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Progress
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open Course →
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- A&P II -->
+
+                <article
+                    class="course-card anatomy2-card"
+                    data-course="anatomy2"
+                >
+
+                    <div class="course-icon">
+                        ❤️
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            SCIENCE
+                        </span>
+
+                        <h3>
+                            Anatomy & Physiology II
+                        </h3>
+
+                        <p>
+                            Endocrine, blood, cardiovascular,
+                            immune, respiratory, digestive,
+                            urinary and reproductive systems.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Progress
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open Course →
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- CHEMISTRY -->
+
+                <article
+                    class="course-card chemistry-card"
+                    data-course="chemistry"
+                >
+
+                    <div class="course-icon">
+                        🧪
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            SCIENCE
+                        </span>
+
+                        <h3>
+                            Chemistry
+                        </h3>
+
+                        <p>
+                            Matter, atoms, bonding,
+                            reactions, calculations,
+                            solutions, acids, organic
+                            chemistry and biochemistry.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Progress
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open Course →
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- MICROBIOLOGY -->
+
+                <article
+                    class="course-card microbiology-card"
+                    data-course="microbiology"
+                >
+
+                    <div class="course-icon">
+                        🦠
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            SCIENCE
+                        </span>
+
+                        <h3>
+                            Microbiology
+                        </h3>
+
+                        <p>
+                            Microbial structure,
+                            bacterial genetics,
+                            infection, immunity,
+                            pathogens and laboratory concepts.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Progress
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open Course →
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- STATISTICS -->
+
+                <article
+                    class="course-card statistics-card"
+                    data-course="statistics"
+                >
+
+                    <div class="course-icon">
+                        📊
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            MATH
+                        </span>
+
+                        <h3>
+                            Statistics
+                        </h3>
+
+                        <p>
+                            Descriptive statistics,
+                            probability, distributions,
+                            confidence intervals and
+                            hypothesis testing.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Progress
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open Course →
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- NUTRITION -->
+
+                <article
+                    class="course-card nutrition-card"
+                    data-course="nutrition"
+                >
+
+                    <div class="course-icon">
+                        🍎
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            HEALTH SCIENCE
+                        </span>
+
+                        <h3>
+                            Nutrition & Diet
+                        </h3>
+
+                        <p>
+                            Macronutrients,
+                            micronutrients,
+                            metabolism, nutrition
+                            assessment and therapeutic diets.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Progress
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open Course →
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- LAB -->
+
+                <article
+                    class="course-card lab-card"
+                    data-course="labs"
+                >
+
+                    <div class="course-icon">
+                        🔬
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            PRACTICAL
+                        </span>
+
+                        <h3>
+                            Anatomy & Science Labs
+                        </h3>
+
+                        <p>
+                            Practical identification,
+                            structures, specimens,
+                            microscopy and lab-style testing.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Progress
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open Lab Center →
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- TEAS -->
+
+                <article
+                    class="course-card teas-card"
+                    data-course="teas"
+                >
+
+                    <div class="course-icon">
+                        🎓
+                    </div>
+
+                    <div class="course-content">
+
+                        <span class="course-category">
+                            ADMISSION EXAM
+                        </span>
+
+                        <h3>
+                            TEAS Practice Center
+                        </h3>
+
+                        <p>
+                            1,280+ practice questions,
+                            diagnostics, weak-area training,
+                            strategies and full timed
+                            TEAS simulations.
+                        </p>
+
+                        <div class="course-progress">
+
+                            <span>
+                                Readiness
+                            </span>
+
+                            <span>
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="course-progress-bar">
+
+                            <div class="course-progress-fill">
+                            </div>
+
+                        </div>
+
+                        <button class="course-button">
+                            Open TEAS Center →
+                        </button>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             WEAK AREAS
+        ================================================== -->
+
+        <section class="weak-areas-section">
+
+            <div class="weak-area-card">
+
+                <div class="weak-area-icon">
+                    🎯
+                </div>
+
+                <div>
+
+                    <p class="section-label">
+                        SMART REVIEW
+                    </p>
+
+                    <h2>
+                        Study Your Weak Areas
+                    </h2>
+
+                    <p>
+                        Questions you miss during quizzes
+                        will be saved so you can focus on
+                        concepts that need more practice.
+                    </p>
+
+                </div>
+
+                <button id="weak-area-button">
+                    Review Weak Areas →
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             A&P I COURSE PAGE
+        ================================================== -->
+
+        <section
+            id="anatomy1-page"
+            class="course-page hidden"
+        >
+
+            <div class="course-page-header">
+
+                <button
+                    id="back-to-dashboard"
+                    class="back-button"
+                >
+                    ← Dashboard
+                </button>
+
+                <div class="course-page-title">
+
+                    <div class="course-page-icon">
+                        🫀
+                    </div>
+
+                    <div>
+
+                        <p class="section-label">
+                            FULL COURSE
+                        </p>
+
+                        <h1>
+                            Anatomy & Physiology I
+                        </h1>
+
+                        <p>
+                            Build the foundation needed
+                            for nursing physiology,
+                            pathophysiology and clinical practice.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="course-main-progress">
+
+                <div>
+
+                    <p>
+                        Course Mastery
+                    </p>
+
+                    <h2>
+                        <span id="anatomy1-course-progress">
+                            0
+                        </span>%
+                    </h2>
+
+                </div>
+
+                <div class="course-progress-large">
+
+                    <div
+                        id="anatomy1-course-progress-bar"
+                        class="course-progress-large-fill"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 1 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        01
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 1
+                        </p>
+
+                        <h2>
+                            Foundations of Anatomy & Physiology
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="intro-ap"
+                    >
+
+                        <div class="topic-status">
+                            1
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Introduction to Anatomy & Physiology
+                            </h3>
+
+                            <p>
+                                Anatomy versus physiology,
+                                structural organization,
+                                life processes and organ systems.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Theory
+                                </span>
+
+                                <span>
+                                    Clinical
+                                </span>
+
+                                <span>
+                                    Quiz
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="anatomical-language"
+                    >
+
+                        <div class="topic-status">
+                            2
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Anatomical Terminology
+                            </h3>
+
+                            <p>
+                                Anatomical position,
+                                directional terms,
+                                planes, cavities,
+                                quadrants and body regions.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Theory
+                                </span>
+
+                                <span>
+                                    Lab
+                                </span>
+
+                                <span>
+                                    Practical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="homeostasis"
+                    >
+
+                        <div class="topic-status">
+                            3
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Homeostasis & Feedback
+                            </h3>
+
+                            <p>
+                                Homeostatic control,
+                                receptors, control centers,
+                                effectors and feedback loops.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                                <span>
+                                    Clinical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 2 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        02
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 2
+                        </p>
+
+                        <h2>
+                            Chemistry of Life
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="atoms-elements"
+                    >
+
+                        <div class="topic-status">
+                            4
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Atoms, Elements & Ions
+                            </h3>
+
+                            <p>
+                                Atomic structure,
+                                electrons, ions and
+                                biological electrolytes.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Chemistry
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="chemical-bonds"
+                    >
+
+                        <div class="topic-status">
+                            5
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Chemical Bonds & Water
+                            </h3>
+
+                            <p>
+                                Ionic, covalent and hydrogen
+                                bonding plus polarity and
+                                water properties.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Chemistry
+                                </span>
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="ph"
+                    >
+
+                        <div class="topic-status">
+                            6
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Acids, Bases, pH & Buffers
+                            </h3>
+
+                            <p>
+                                Hydrogen ions,
+                                pH scale and
+                                physiological buffering.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Clinical
+                                </span>
+
+                                <span>
+                                    Chemistry
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="biomolecules"
+                    >
+
+                        <div class="topic-status">
+                            7
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Biological Macromolecules
+                            </h3>
+
+                            <p>
+                                Carbohydrates, lipids,
+                                proteins, nucleic acids
+                                and ATP.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Biochemistry
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 3 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        03
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 3
+                        </p>
+
+                        <h2>
+                            Cells
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="cell-structure"
+                    >
+
+                        <div class="topic-status">
+                            8
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Cell Structure & Organelles
+                            </h3>
+
+                            <p>
+                                Plasma membrane,
+                                nucleus, mitochondria,
+                                ribosomes, ER, Golgi
+                                and other organelles.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Cell Biology
+                                </span>
+
+                                <span>
+                                    Lab
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="membrane-transport"
+                    >
+
+                        <div class="topic-status">
+                            9
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Membrane Transport
+                            </h3>
+
+                            <p>
+                                Diffusion, osmosis,
+                                facilitated diffusion,
+                                active transport,
+                                endocytosis and exocytosis.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                                <span>
+                                    Clinical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="cell-division"
+                    >
+
+                        <div class="topic-status">
+                            10
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                DNA, Protein Synthesis & Cell Division
+                            </h3>
+
+                            <p>
+                                Gene expression,
+                                transcription, translation,
+                                cell cycle and mitosis.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Genetics
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 4 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        04
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 4
+                        </p>
+
+                        <h2>
+                            Tissues
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="epithelial"
+                    >
+
+                        <div class="topic-status">
+                            11
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Epithelial Tissue
+                            </h3>
+
+                            <p>
+                                Classification,
+                                functions, glands
+                                and microscopic identification.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Histology
+                                </span>
+
+                                <span>
+                                    Lab
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="connective"
+                    >
+
+                        <div class="topic-status">
+                            12
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Connective Tissue
+                            </h3>
+
+                            <p>
+                                Matrix, fibers,
+                                connective tissue proper,
+                                cartilage, bone and blood.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Histology
+                                </span>
+
+                                <span>
+                                    Lab
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="muscle-nervous-tissue"
+                    >
+
+                        <div class="topic-status">
+                            13
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Muscle & Nervous Tissue
+                            </h3>
+
+                            <p>
+                                Skeletal, cardiac,
+                                smooth muscle and
+                                nervous tissue fundamentals.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Histology
+                                </span>
+
+                                <span>
+                                    Practical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 5 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        05
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 5
+                        </p>
+
+                        <h2>
+                            Integumentary System
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="skin"
+                    >
+
+                        <div class="topic-status">
+                            14
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Skin Structure & Function
+                            </h3>
+
+                            <p>
+                                Epidermis, dermis,
+                                hypodermis, glands,
+                                hair and nails.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Anatomy
+                                </span>
+
+                                <span>
+                                    Lab
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="skin-clinical"
+                    >
+
+                        <div class="topic-status">
+                            15
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Skin Physiology, Burns & Repair
+                            </h3>
+
+                            <p>
+                                Thermoregulation,
+                                wound healing,
+                                burns and clinical skin concepts.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Clinical
+                                </span>
+
+                                <span>
+                                    Nursing
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 6 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        06
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 6
+                        </p>
+
+                        <h2>
+                            Skeletal System
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="bone-tissue"
+                    >
+
+                        <div class="topic-status">
+                            16
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Bone Tissue & Bone Physiology
+                            </h3>
+
+                            <p>
+                                Bone cells, compact
+                                and spongy bone,
+                                remodeling and calcium regulation.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Anatomy
+                                </span>
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="axial-skeleton"
+                    >
+
+                        <div class="topic-status">
+                            17
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Axial Skeleton
+                            </h3>
+
+                            <p>
+                                Skull, vertebral column,
+                                thoracic cage and
+                                major bone landmarks.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Lab
+                                </span>
+
+                                <span>
+                                    Practical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="appendicular-skeleton"
+                    >
+
+                        <div class="topic-status">
+                            18
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Appendicular Skeleton
+                            </h3>
+
+                            <p>
+                                Pectoral girdle,
+                                upper limb,
+                                pelvic girdle and lower limb.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Lab
+                                </span>
+
+                                <span>
+                                    Practical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="joints"
+                    >
+
+                        <div class="topic-status">
+                            19
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Joints & Body Movements
+                            </h3>
+
+                            <p>
+                                Joint classifications,
+                                synovial anatomy
+                                and anatomical movements.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Anatomy
+                                </span>
+
+                                <span>
+                                    Practical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 7 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        07
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 7
+                        </p>
+
+                        <h2>
+                            Muscular System
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="muscle-physiology"
+                    >
+
+                        <div class="topic-status">
+                            20
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Skeletal Muscle Physiology
+                            </h3>
+
+                            <p>
+                                Sarcomeres,
+                                sliding filament mechanism,
+                                excitation-contraction coupling
+                                and ATP.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                                <span>
+                                    High Yield
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="major-muscles"
+                    >
+
+                        <div class="topic-status">
+                            21
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Major Skeletal Muscles
+                            </h3>
+
+                            <p>
+                                Muscle identification,
+                                actions and
+                                major anatomical groups.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Lab
+                                </span>
+
+                                <span>
+                                    Practical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODULE 8 -->
+
+            <div class="module-section">
+
+                <div class="module-heading">
+
+                    <span class="module-number">
+                        08
+                    </span>
+
+                    <div>
+
+                        <p class="section-label">
+                            MODULE 8
+                        </p>
+
+                        <h2>
+                            Nervous System
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="topic-list">
+
+                    <article
+                        class="topic-card"
+                        data-topic="neurons"
+                    >
+
+                        <div class="topic-status">
+                            22
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Neurons & Neuroglia
+                            </h3>
+
+                            <p>
+                                Neuron anatomy,
+                                glial cells,
+                                myelin and nervous-system organization.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Anatomy
+                                </span>
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="action-potentials"
+                    >
+
+                        <div class="topic-status">
+                            23
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Membrane Potentials & Synapses
+                            </h3>
+
+                            <p>
+                                Resting membrane potential,
+                                action potentials,
+                                neurotransmitters and synapses.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                                <span>
+                                    High Yield
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="brain-spinal-cord"
+                    >
+
+                        <div class="topic-status">
+                            24
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Brain & Spinal Cord
+                            </h3>
+
+                            <p>
+                                CNS anatomy,
+                                meninges, ventricles,
+                                brain regions and spinal cord.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Anatomy
+                                </span>
+
+                                <span>
+                                    Lab
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="peripheral-nervous"
+                    >
+
+                        <div class="topic-status">
+                            25
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Peripheral Nervous System
+                            </h3>
+
+                            <p>
+                                Cranial nerves,
+                                spinal nerves,
+                                sensory and motor pathways.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Anatomy
+                                </span>
+
+                                <span>
+                                    Practical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+
+                    <article
+                        class="topic-card"
+                        data-topic="autonomic"
+                    >
+
+                        <div class="topic-status">
+                            26
+                        </div>
+
+                        <div class="topic-information">
+
+                            <h3>
+                                Autonomic Nervous System
+                            </h3>
+
+                            <p>
+                                Sympathetic,
+                                parasympathetic,
+                                neurotransmitters
+                                and organ responses.
+                            </p>
+
+                            <div class="topic-tags">
+
+                                <span>
+                                    Physiology
+                                </span>
+
+                                <span>
+                                    Clinical
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button class="topic-button">
+                            Start →
+                        </button>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+            <!-- A&P I FINAL PRACTICE -->
+
+            <div class="final-practice-card">
+
+                <div>
+
+                    <p class="section-label">
+                        FINAL REVIEW
+                    </p>
+
+                    <h2>
+                        A&P I Mastery Center
+                    </h2>
+
+                    <p>
+                        Review the entire course
+                        before your class exams
+                        and practicals.
+                    </p>
+
+                </div>
+
+
+                <div class="final-practice-actions">
+
+                    <button id="anatomy1-practice-button">
+                        Practice Questions
+                    </button>
+
+                    <button id="anatomy1-exam-button">
+                        Start Mastery Exam
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             A&P I TOPIC 1 LESSON
+        ================================================== -->
+
+        <section
+            id="intro-ap-page"
+            class="lesson-page hidden"
+        >
+
+            <div class="lesson-top-bar">
+
+                <button
+                    id="back-to-anatomy1"
+                    class="back-button"
+                >
+                    ← A&P I
+                </button>
+
+                <div class="lesson-progress-text">
+
+                    <span>
+                        Topic 1 of 26
+                    </span>
+
+                    <span>
+                        Introduction to A&P
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="lesson-hero">
+
+                <div class="lesson-hero-content">
+
+                    <p class="section-label">
+                        ANATOMY & PHYSIOLOGY I
+                    </p>
+
+                    <h1>
+                        Introduction to Anatomy & Physiology
+                    </h1>
+
+                    <p class="lesson-description">
+                        Learn how anatomy and physiology
+                        work together and how the human body
+                        is organized from atoms to organ systems.
+                    </p>
+
+                    <div class="lesson-meta">
+
+                        <span>
+                            📖 Full Lesson
+                        </span>
+
+                        <span>
+                            🩺 Nursing Connections
+                        </span>
+
+                        <span>
+                            🧠 Quick Review
+                        </span>
+
+                        <span>
+                            🎯 Mastery Quiz
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="lesson-hero-number">
+                    01
+                </div>
+
+            </div>
+
+
+            <nav class="lesson-navigation">
+
+                <a href="#lesson-overview">
+                    Overview
+                </a>
+
+                <a href="#anatomy-vs-physiology">
+                    Anatomy vs Physiology
+                </a>
+
+                <a href="#levels-organization">
+                    Organization
+                </a>
+
+                <a href="#life-functions">
+                    Life Functions
+                </a>
+
+                <a href="#organ-systems">
+                    Organ Systems
+                </a>
+
+                <a href="#clinical-connection">
+                    Clinical
+                </a>
+
+                <a href="#lesson-summary">
+                    Summary
+                </a>
+
+            </nav>
+
+
+            <div class="lesson-layout">
+
+                <article class="lesson-content">
+
+
+                    <section
+                        id="lesson-overview"
+                        class="lesson-section"
+                    >
+
+                        <div class="lesson-section-number">
+                            01
+                        </div>
+
+                        <div class="lesson-section-content">
+
+                            <p class="lesson-small-label">
+                                FOUNDATION
+                            </p>
+
+                            <h2>
+                                Anatomy and Physiology
+                            </h2>
+
+                            <p>
+                                Anatomy studies the structures
+                                of the body and the relationships
+                                among those structures.
+                            </p>
+
+                            <p>
+                                Physiology studies how body
+                                structures function.
+                            </p>
+
+                            <p>
+                                These subjects are inseparable
+                                because the function of a body
+                                structure depends strongly on
+                                how that structure is built.
+                            </p>
+
+
+                            <div class="concept-example">
+
+                                <span>
+                                    ❤️
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Heart Example
+                                    </strong>
+
+                                    <p>
+                                        Studying the chambers,
+                                        valves and vessels of
+                                        the heart is anatomy.
+                                        Studying how the heart
+                                        generates pressure and
+                                        pumps blood is physiology.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="important-box">
+
+                                <strong>
+                                    Key Principle
+                                </strong>
+
+                                <p>
+                                    Structure determines function.
+                                    This principle appears throughout
+                                    every organ system.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section
+                        id="anatomy-vs-physiology"
+                        class="lesson-section"
+                    >
+
+                        <div class="lesson-section-number">
+                            02
+                        </div>
+
+                        <div class="lesson-section-content">
+
+                            <p class="lesson-small-label">
+                                CORE CONCEPT
+                            </p>
+
+                            <h2>
+                                Branches of Anatomy & Physiology
+                            </h2>
+
+
+                            <div class="definition-grid">
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Gross Anatomy
+                                    </h3>
+
+                                    <p>
+                                        Structures visible
+                                        without a microscope.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Regional Anatomy
+                                    </h3>
+
+                                    <p>
+                                        All structures within
+                                        one specific body region.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Systemic Anatomy
+                                    </h3>
+
+                                    <p>
+                                        Study of structures
+                                        belonging to one organ system.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Microscopic Anatomy
+                                    </h3>
+
+                                    <p>
+                                        Structures requiring
+                                        magnification.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Histology
+                                    </h3>
+
+                                    <p>
+                                        Microscopic study
+                                        of tissues.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Cytology
+                                    </h3>
+
+                                    <p>
+                                        Study of individual cells.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <p>
+                                Physiology can also be organized
+                                by organ system. Neurophysiology
+                                examines nervous-system function,
+                                cardiovascular physiology examines
+                                the heart and blood vessels,
+                                respiratory physiology examines gas
+                                exchange and renal physiology
+                                examines kidney function.
+                            </p>
+
+
+                            <div class="memory-tip">
+
+                                <span>
+                                    🧠
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Memory Tip
+                                    </strong>
+
+                                    <p>
+                                        Anatomy asks:
+                                        “What is it and where is it?”
+                                        Physiology asks:
+                                        “How does it work?”
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section
+                        id="levels-organization"
+                        class="lesson-section"
+                    >
+
+                        <div class="lesson-section-number">
+                            03
+                        </div>
+
+                        <div class="lesson-section-content">
+
+                            <p class="lesson-small-label">
+                                BODY ORGANIZATION
+                            </p>
+
+                            <h2>
+                                Six Levels of Structural Organization
+                            </h2>
+
+
+                            <div class="organization-flow">
+
+                                <div class="organization-item">
+
+                                    <span class="organization-number">
+                                        1
+                                    </span>
+
+                                    <div>
+
+                                        <h3>
+                                            Chemical
+                                        </h3>
+
+                                        <p>
+                                            Atoms and molecules.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="organization-arrow">
+                                    ↓
+                                </div>
+
+
+                                <div class="organization-item">
+
+                                    <span class="organization-number">
+                                        2
+                                    </span>
+
+                                    <div>
+
+                                        <h3>
+                                            Cellular
+                                        </h3>
+
+                                        <p>
+                                            Molecules form cells,
+                                            the basic units of life.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="organization-arrow">
+                                    ↓
+                                </div>
+
+
+                                <div class="organization-item">
+
+                                    <span class="organization-number">
+                                        3
+                                    </span>
+
+                                    <div>
+
+                                        <h3>
+                                            Tissue
+                                        </h3>
+
+                                        <p>
+                                            Similar cells cooperate
+                                            to perform common functions.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="organization-arrow">
+                                    ↓
+                                </div>
+
+
+                                <div class="organization-item">
+
+                                    <span class="organization-number">
+                                        4
+                                    </span>
+
+                                    <div>
+
+                                        <h3>
+                                            Organ
+                                        </h3>
+
+                                        <p>
+                                            Two or more tissue types
+                                            form a functional structure.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="organization-arrow">
+                                    ↓
+                                </div>
+
+
+                                <div class="organization-item">
+
+                                    <span class="organization-number">
+                                        5
+                                    </span>
+
+                                    <div>
+
+                                        <h3>
+                                            Organ System
+                                        </h3>
+
+                                        <p>
+                                            Multiple organs cooperate
+                                            toward major body functions.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="organization-arrow">
+                                    ↓
+                                </div>
+
+
+                                <div class="organization-item">
+
+                                    <span class="organization-number">
+                                        6
+                                    </span>
+
+                                    <div>
+
+                                        <h3>
+                                            Organism
+                                        </h3>
+
+                                        <p>
+                                            All body systems operating
+                                            together as one human being.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="important-box">
+
+                                <strong>
+                                    Exam Favorite
+                                </strong>
+
+                                <p>
+                                    Remember the sequence:
+                                    chemical → cellular →
+                                    tissue → organ →
+                                    organ system → organism.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section
+                        id="life-functions"
+                        class="lesson-section"
+                    >
+
+                        <div class="lesson-section-number">
+                            04
+                        </div>
+
+                        <div class="lesson-section-content">
+
+                            <p class="lesson-small-label">
+                                LIFE PROCESSES
+                            </p>
+
+                            <h2>
+                                Characteristics of Living Humans
+                            </h2>
+
+
+                            <div class="definition-grid">
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Metabolism
+                                    </h3>
+
+                                    <p>
+                                        All chemical reactions
+                                        occurring in the body.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Responsiveness
+                                    </h3>
+
+                                    <p>
+                                        Detecting and responding
+                                        to internal or external change.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Movement
+                                    </h3>
+
+                                    <p>
+                                        Motion of the entire body,
+                                        organs, cells or substances.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Growth
+                                    </h3>
+
+                                    <p>
+                                        Increase in body size
+                                        through cell number or size.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Differentiation
+                                    </h3>
+
+                                    <p>
+                                        Development of specialized
+                                        cells from less-specialized cells.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Reproduction
+                                    </h3>
+
+                                    <p>
+                                        Formation of new cells
+                                        or a new organism.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Digestion
+                                    </h3>
+
+                                    <p>
+                                        Breakdown of food
+                                        into absorbable molecules.
+                                    </p>
+
+                                </div>
+
+
+                                <div class="definition-card">
+
+                                    <h3>
+                                        Excretion
+                                    </h3>
+
+                                    <p>
+                                        Removal of metabolic
+                                        wastes from the body.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section
+                        id="organ-systems"
+                        class="lesson-section"
+                    >
+
+                        <div class="lesson-section-number">
+                            05
+                        </div>
+
+                        <div class="lesson-section-content">
+
+                            <p class="lesson-small-label">
+                                THE HUMAN BODY
+                            </p>
+
+                            <h2>
+                                The 11 Organ Systems
+                            </h2>
+
+
+                            <div class="organ-system-grid">
+
+                                <div>
+                                    <strong>
+                                        Integumentary
+                                    </strong>
+
+                                    <p>
+                                        Protection,
+                                        temperature regulation
+                                        and sensation.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Skeletal
+                                    </strong>
+
+                                    <p>
+                                        Support,
+                                        protection,
+                                        minerals and blood-cell formation.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Muscular
+                                    </strong>
+
+                                    <p>
+                                        Movement,
+                                        posture and heat production.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Nervous
+                                    </strong>
+
+                                    <p>
+                                        Rapid electrical
+                                        communication and control.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Endocrine
+                                    </strong>
+
+                                    <p>
+                                        Hormonal regulation
+                                        and long-term control.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Cardiovascular
+                                    </strong>
+
+                                    <p>
+                                        Transport of blood,
+                                        oxygen, nutrients and wastes.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Lymphatic / Immune
+                                    </strong>
+
+                                    <p>
+                                        Fluid return
+                                        and immune defense.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Respiratory
+                                    </strong>
+
+                                    <p>
+                                        Oxygen and carbon-dioxide
+                                        gas exchange.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Digestive
+                                    </strong>
+
+                                    <p>
+                                        Digestion and
+                                        nutrient absorption.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Urinary
+                                    </strong>
+
+                                    <p>
+                                        Waste removal,
+                                        fluid, electrolyte
+                                        and acid-base regulation.
+                                    </p>
+                                </div>
+
+
+                                <div>
+                                    <strong>
+                                        Reproductive
+                                    </strong>
+
+                                    <p>
+                                        Gamete production
+                                        and reproduction.
+                                    </p>
+                                </div>
+
+                            </div>
+
+
+                            <div class="important-box">
+
+                                <strong>
+                                    Nursing Connection
+                                </strong>
+
+                                <p>
+                                    Organ systems are interdependent.
+                                    A problem in one system can quickly
+                                    change the function of several others.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section
+                        id="clinical-connection"
+                        class="lesson-section"
+                    >
+
+                        <div class="lesson-section-number">
+                            06
+                        </div>
+
+                        <div class="lesson-section-content">
+
+                            <p class="lesson-small-label">
+                                CLINICAL APPLICATION
+                            </p>
+
+                            <h2>
+                                Think Across Organ Systems
+                            </h2>
+
+
+                            <div class="clinical-case">
+
+                                <div class="clinical-case-header">
+
+                                    <span>
+                                        🩺
+                                    </span>
+
+                                    <div>
+
+                                        <p>
+                                            PATIENT SCENARIO
+                                        </p>
+
+                                        <h3>
+                                            Shortness of Breath
+                                        </h3>
+
+                                    </div>
+
+                                </div>
+
+
+                                <p>
+                                    A patient develops severe
+                                    shortness of breath and low
+                                    blood oxygen.
+                                </p>
+
+
+                                <div class="clinical-question">
+
+                                    <strong>
+                                        Why might confusion develop?
+                                    </strong>
+
+                                    <p class="clinical-answer">
+                                        The respiratory system
+                                        is not supplying enough
+                                        oxygen. The cardiovascular
+                                        system therefore delivers
+                                        less oxygen to brain tissue,
+                                        affecting nervous-system
+                                        function.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section
+                        id="lesson-summary"
+                        class="lesson-section"
+                    >
+
+                        <div class="lesson-section-number">
+                            07
+                        </div>
+
+                        <div class="lesson-section-content">
+
+                            <p class="lesson-small-label">
+                                EXAM REVIEW
+                            </p>
+
+                            <h2>
+                                High-Yield Summary
+                            </h2>
+
+
+                            <div class="summary-checklist">
+
+                                <div>
+                                    ✓ Anatomy studies structure.
+                                </div>
+
+                                <div>
+                                    ✓ Physiology studies function.
+                                </div>
+
+                                <div>
+                                    ✓ Structure and function are related.
+                                </div>
+
+                                <div>
+                                    ✓ Histology studies tissues.
+                                </div>
+
+                                <div>
+                                    ✓ Cytology studies cells.
+                                </div>
+
+                                <div>
+                                    ✓ Cells are the basic structural
+                                    and functional units of life.
+                                </div>
+
+                                <div>
+                                    ✓ Human organization progresses
+                                    from chemical level to organism.
+                                </div>
+
+                                <div>
+                                    ✓ The body contains 11 major
+                                    organ systems.
+                                </div>
+
+                                <div>
+                                    ✓ Organ systems depend on
+                                    one another.
+                                </div>
+
+                            </div>
+
+
+                            <div class="mastery-reminder">
+
+                                <span>
+                                    🎯
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Topic Mastery
+                                    </strong>
+
+                                    <p>
+                                        Complete Quick Review
+                                        and earn at least 90%
+                                        on the mastery quiz.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="lesson-actions">
+
+                        <div>
+
+                            <p class="section-label">
+                                READY TO PRACTICE?
+                            </p>
+
+                            <h2>
+                                Test Your Understanding
+                            </h2>
+
+                            <p>
+                                Use active recall before
+                                taking the randomized quiz.
+                            </p>
+
+                        </div>
+
+
+                        <div class="lesson-action-buttons">
+
+                            <button
+                                id="intro-quick-review-button"
+                                class="secondary-lesson-button"
+                            >
+                                🧠 Quick Review
+                            </button>
+
+                            <button
+                                id="intro-quiz-button"
+                                class="primary-lesson-button"
+                            >
+                                🎯 Start Mastery Quiz
+                            </button>
+
+                        </div>
+
+                    </section>
+
+                </article>
+
+
+                <aside class="lesson-sidebar">
+
+                    <div class="sidebar-card">
+
+                        <p class="sidebar-label">
+                            TOPIC PROGRESS
+                        </p>
+
+                        <div class="sidebar-progress-number">
+
+                            <span id="intro-topic-progress">
+                                0
+                            </span>%
+
+                        </div>
+
+                        <div class="sidebar-progress-bar">
+
+                            <div
+                                id="intro-topic-progress-fill"
+                                class="sidebar-progress-fill"
+                            >
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="sidebar-card">
+
+                        <p class="sidebar-label">
+                            MASTERY CHECKLIST
+                        </p>
+
+                        <div class="sidebar-checklist">
+
+                            <div>
+                                <span>○</span>
+                                Read lesson
+                            </div>
+
+                            <div>
+                                <span>○</span>
+                                Quick Review
+                            </div>
+
+                            <div>
+                                <span>○</span>
+                                Pass quiz
+                            </div>
+
+                            <div>
+                                <span>○</span>
+                                Reach 90%
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="sidebar-card">
+
+                        <p class="sidebar-label">
+                            QUICK FACT
+                        </p>
+
+                        <p>
+                            The human body contains
+                            trillions of cells working
+                            together across multiple
+                            organ systems.
+                        </p>
+
+                    </div>
+
+
+                    <div class="sidebar-card sidebar-tip">
+
+                        <span>
+                            💡
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Study Tip
+                            </strong>
+
+                            <p>
+                                Try explaining every
+                                major concept aloud
+                                without looking at your notes.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer>
+
+            <div>
+
+                <strong>
+                    Nursing Study Hub
+                </strong>
+
+                <p>
+                    Learn the concept.
+                    Practice retrieval.
+                    Build mastery.
+                </p>
+
+            </div>
+
+            <span>
+                Built for nursing prerequisite success.
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="script.js"></script>
+
+    <script src="ap2.js"></script>
+
+    <script src="chemistry.js"></script>
+
+    <script src="microbiology.js"></script>
+
+    <script src="statistics.js"></script>
+
+    <script src="nutrition.js"></script>
+
+    <script src="labs.js"></script>
+
+    <script src="teas.js"></script>
+
+    <script src="studytools.js"></script>
+
+    <script src="launch.js"></script>
+
+</body>
+
+</html>
